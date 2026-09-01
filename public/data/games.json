@@ -65,7 +65,18 @@
     "isNew": true,
     "icon": "🥋",
     "path": "/games/street-legend/index.html"
-}
+},
+    {
+        "id": "deep-eat",
+        "name": "JZ 深海吞噬",
+        "description": "在深海中不断吞噬虾米和小鱼成长，小心比你更大的猎食者。",
+        "category": "休闲",
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "isNew": true,
+        "icon": "🌊",
+        "path": "/games/deep-eat/index.html"
+    }
 
 
 ]
