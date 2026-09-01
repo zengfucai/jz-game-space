@@ -12,7 +12,8 @@ let searchKeyword = "";
 
 async function init() {
     try {
-        const response = await fetch("/data/games.json");
+        const response = await fetch(
+    `${import.meta.env.BASE_URL}data/games.json`);
 
         if (!response.ok) {
             throw new Error("无法读取游戏数据");
