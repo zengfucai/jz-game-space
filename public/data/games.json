@@ -1,0 +1,71 @@
+[
+    {
+        "id": "2048",
+        "name": "2048",
+        "description": "经典数字益智小游戏，合并数字直到获得 2048。",
+        "category": "益智",
+        "version": "1.0.0",
+        "date": "2026-08-31",
+        "isNew": true,
+        "icon": "🔢",
+        "path": "/games/2048/index.html"
+    },
+    {
+        "id": "snake",
+        "name": "贪吃蛇",
+        "description": "经典贪吃蛇小游戏，控制小蛇不断吃掉食物。",
+        "category": "休闲",
+        "version": "1.0.0",
+        "date": "2026-08-30",
+        "isNew": false,
+        "icon": "🐍",
+        "path": "/games/snake/index.html"
+    },
+
+    {
+        "id": "minesweeper",
+        "name": "扫雷",
+        "description": "经典扫雷小游戏，找出所有地雷。",
+        "category": "益智",
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "isNew": true,
+        "icon": "💣",
+        "path": "/games/minesweeper/index.html"
+    },
+{
+    "id": "gomoku",
+    "name": "五子棋",
+    "description": "经典双人五子棋，黑白双方轮流落子，先连成五子者获胜。",
+    "category": "益智",
+    "version": "1.0.0",
+    "date": "2026-09-01",
+    "isNew": true,
+    "icon": "❌⭕",
+    "path": "/games/gomoku/index.html"
+},
+{
+    "id": "tower-defense",
+    "name": "JZ 塔防",
+    "description": "建造炮塔抵御一波又一波的敌人，守住你的城堡。",
+    "category": "策略",
+    "version": "1.0.0",
+    "date": "2026-09-01",
+    "isNew": true,
+    "icon": "🏰",
+    "path": "/games/tower-defense/index.html"
+},
+{
+    "id": "street-legend",
+    "name": "JZ 街头传说",
+    "description": "复古横版清关动作游戏，击败敌人并突破城市街头。",
+    "category": "动作",
+    "version": "1.0.0",
+    "date": "2026-09-01",
+    "isNew": true,
+    "icon": "🥋",
+    "path": "/games/street-legend/index.html"
+}
+
+
+]

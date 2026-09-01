@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JZ 塔防</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #080b10;
+    color: #fff;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    padding: 18px;
+}
+
+.game {
+    width: min(1100px, 100%);
+    margin: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.title {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.back {
+    color: #aaa;
+    text-decoration: none;
+    border: 1px solid #303640;
+    padding: 9px 14px;
+    border-radius: 9px;
+}
+
+.back:hover {
+    color: #fff;
+    border-color: #777;
+}
+
+.panel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.stat {
+    background: #12171f;
+    border: 1px solid #292f38;
+    border-radius: 10px;
+    padding: 10px 16px;
+    min-width: 110px;
+}
+
+.stat span {
+    display: block;
+    color: #777;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.stat strong {
+    font-size: 18px;
+}
+
+.game-area {
+    display: grid;
+    grid-template-columns: 1fr 225px;
+    gap: 12px;
+}
+
+.canvas-box {
+    position: relative;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    background: #0d1319;
+    border: 1px solid #303741;
+    border-radius: 14px;
+    cursor: crosshair;
+}
+
+.sidebar {
+    background: #11161d;
+    border: 1px solid #292f38;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.sidebar h3 {
+    margin: 0 0 12px;
+}
+
+.tower {
+    background: #181e26;
+    border: 1px solid #303640;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 9px;
+    cursor: pointer;
+}
+
+.tower:hover {
+    background: #222934;
+}
+
+.tower.selected {
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #fff inset;
+}
+
+.tower-title {
+    font-weight: bold;
+}
+
+.tower-info {
+    color: #888;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 5px;
+}
+
+button {
+    width: 100%;
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 14px;
+    margin-top: 7px;
+    background: #252c36;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #363e4a;
+}
+
+.primary {
+    background: #eee;
+    color: #111;
+    font-weight: bold;
+}
+
+.primary:hover {
+    background: #ccc;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+}
+
+.message {
+    min-height: 28px;
+    text-align: center;
+    color: #aaa;
+    margin-top: 12px;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+}
+
+.overlay.show {
+    display: flex;
+}
+
+.modal {
+    width: min(420px, 90%);
+    background: #151a21;
+    border: 1px solid #343b46;
+    border-radius: 18px;
+    padding: 30px;
+    text-align: center;
+}
+
+.modal h2 {
+    margin-top: 0;
+    font-size: 30px;
+}
+
+.modal p {
+    color: #aaa;
+}
+
+.modal button {
+    width: auto;
+    min-width: 160px;
+}
+
+@media (max-width: 800px) {
+    .game-area {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="game">
+
+```
+<div class="header">
+
+    <div>
+        <div class="title">🏰 JZ 塔防</div>
+
+        <div class="subtitle">
+            JZ GAME SPACE · TOWER DEFENSE
+        </div>
+    </div>
+
+    <a href="/" class="back">
+        ← 游戏空间
+    </a>
+
+</div>
+
+
+<div class="panel">
+
+    <div class="stat">
+        <span>城堡生命</span>
+        <strong>❤️ <b id="hp">20</b></strong>
+    </div>
+
+    <div class="stat">
+        <span>金币</span>
+        <strong>💰 <b id="gold">300</b></strong>
+    </div>
+
+    <div class="stat">
+        <span>波次</span>
+        <strong>🌊 <b id="wave">0</b>/20</strong>
+    </div>
+
+    <div class="stat">
+        <span>场上敌人</span>
+        <strong>👾 <b id="enemyCount">0</b></strong>
+    </div>
+
+</div>
+
+
+<div class="game-area">
+
+    <div class="canvas-box">
+
+        <canvas
+            id="gameCanvas"
+            width="800"
+            height="520">
+        </canvas>
+
+    </div>
+
+
+    <aside class="sidebar">
+
+        <h3>🗼 炮塔</h3>
+
+
+        <div
+            class="tower"
+            id="towerBasic"
+            onclick="selectTower('basic')">
+
+            <div class="tower-title">
+                🏹 弩塔
+            </div>
+
+            <div class="tower-info">
+                价格：💰 80<br>
+                伤害：18<br>
+                射程：110
+            </div>
+
+        </div>
+
+
+        <div
+            class="tower"
+            id="towerFire"
+            onclick="selectTower('fire')">
+
+            <div class="tower-title">
+                🔥 火焰塔
+            </div>
+
+            <div class="tower-info">
+                价格：💰 130<br>
+                伤害：35<br>
+                射程：95
+            </div>
+
+        </div>
+
+
+        <div
+            class="tower"
+            id="towerIce"
+            onclick="selectTower('ice')">
+
+            <div class="tower-title">
+                ❄️ 冰冻塔
+            </div>
+
+            <div class="tower-info">
+                价格：💰 110<br>
+                伤害：10<br>
+                射程：125
+            </div>
+
+        </div>
+
+
+        <button
+            class="primary"
+            onclick="startWave()">
+            ▶ 开始下一波
+        </button>
+
+
+        <div class="controls">
+
+            <button onclick="togglePause()">
+                ⏸ 暂停
+            </button>
+
+            <button onclick="toggleSpeed()">
+                ⚡ <span id="speedText">1x</span>
+            </button>
+
+        </div>
+
+
+        <button onclick="restartGame()">
+            🔄 重新开始
+        </button>
+
+    </aside>
+
+</div>
+
+
+<div
+    class="message"
+    id="message">
+    选择炮塔，然后点击地图建造
+</div>
+```
+
+</div>
+
+<div
+    class="overlay"
+    id="overlay">
+
+```
+<div class="modal">
+
+    <h2 id="resultTitle">
+        游戏结束
+    </h2>
+
+    <p id="resultText"></p>
+
+    <button
+        class="primary"
+        onclick="restartGame()">
+        再玩一次
+    </button>
+
+</div>
+```
+
+</div>
+
+<script>
+
+/* =====================================================
+   JZ TOWER DEFENSE
+   ===================================================== */
+
+const canvas =
+    document.getElementById("gameCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+/* =====================================================
+   游戏状态
+   ===================================================== */
+
+let hp = 20;
+
+let gold = 300;
+
+let wave = 0;
+
+let enemies = [];
+
+let towers = [];
+
+let bullets = [];
+
+let selectedTower = null;
+
+let waveRunning = false;
+
+let enemiesToSpawn = 0;
+
+let spawnTimer = 0;
+
+let paused = false;
+
+let speed = 1;
+
+let gameEnded = false;
+
+let lastTime = 0;
+
+
+/* =====================================================
+   路线
+   最后一个点就是城堡入口
+   ===================================================== */
+
+const path = [
+
+    { x: -30, y: 100 },
+
+    { x: 150, y: 100 },
+
+    { x: 150, y: 250 },
+
+    { x: 350, y: 250 },
+
+    { x: 350, y: 100 },
+
+    { x: 600, y: 100 },
+
+    { x: 600, y: 380 },
+
+    { x: 300, y: 380 },
+
+    { x: 300, y: 450 },
+
+    { x: 700, y: 450 }
+
+];
+
+
+/* =====================================================
+   城堡
+   ===================================================== */
+
+const castle = {
+
+    x: 735,
+
+    y: 450,
+
+    radius: 42
+
+};
+
+
+/* =====================================================
+   炮塔类型
+   ===================================================== */
+
+const towerTypes = {
+
+    basic: {
+
+        cost: 80,
+
+        damage: 18,
+
+        range: 110,
+
+        cooldown: 700,
+
+        color: "#dddddd"
+
+    },
+
+    fire: {
+
+        cost: 130,
+
+        damage: 35,
+
+        range: 95,
+
+        cooldown: 1100,
+
+        color: "#ff765c"
+
+    },
+
+    ice: {
+
+        cost: 110,
+
+        damage: 10,
+
+        range: 125,
+
+        cooldown: 900,
+
+        color: "#74c8ff"
+
+    }
+
+};
+
+
+/* =====================================================
+   创建敌人
+   ===================================================== */
+
+function createEnemy() {
+
+    let type = "normal";
+
+
+    if (
+        wave >= 5 &&
+        Math.random() < 0.2
+    ) {
+
+        type = "fast";
+
+    }
+
+
+    if (
+        wave >= 10 &&
+        Math.random() < 0.15
+    ) {
+
+        type = "tank";
+
+    }
+
+
+    const data = {
+
+        normal: {
+
+            hp: 70 + wave * 12,
+
+            speed: 55,
+
+            reward: 12,
+
+            radius: 13
+
+        },
+
+        fast: {
+
+            hp: 45 + wave * 8,
+
+            speed: 95,
+
+            reward: 15,
+
+            radius: 10
+
+        },
+
+        tank: {
+
+            hp: 220 + wave * 30,
+
+            speed: 35,
+
+            reward: 30,
+
+            radius: 18
+
+        }
+
+    }[type];
+
+
+    enemies.push({
+
+        x: path[0].x,
+
+        y: path[0].y,
+
+        target: 1,
+
+        hp: data.hp,
+
+        maxHp: data.hp,
+
+        speed: data.speed,
+
+        reward: data.reward,
+
+        radius: data.radius,
+
+        type: type,
+
+        slow: 1
+
+    });
+
+}
+
+
+/* =====================================================
+   开始波次
+   ===================================================== */
+
+function startWave() {
+
+    if (
+        waveRunning ||
+        gameEnded ||
+        hp <= 0
+    ) {
+
+        return;
+
+    }
+
+
+    if (wave >= 20) {
+
+        showResult(
+            "🏆 完美通关",
+            "你成功守住了 JZ 城堡！"
+        );
+
+        return;
+
+    }
+
+
+    wave++;
+
+    waveRunning = true;
+
+    enemiesToSpawn = 5 + wave * 2;
+
+    spawnTimer = 0;
+
+
+    document.getElementById("message")
+        .textContent =
+        `🌊 第 ${wave} 波敌人来袭！`;
+
+    updateUI();
+
+}
+
+
+/* =====================================================
+   生成敌人
+   ===================================================== */
+
+function spawnEnemy() {
+
+    if (enemiesToSpawn <= 0) {
+
+        return;
+
+    }
+
+
+    createEnemy();
+
+    enemiesToSpawn--;
+
+}
+
+
+/* =====================================================
+   炮塔选择
+   ===================================================== */
+
+function selectTower(type) {
+
+    if (gameEnded) {
+
+        return;
+
+    }
+
+
+    selectedTower = type;
+
+
+    document
+        .querySelectorAll(".tower")
+        .forEach(el =>
+            el.classList.remove("selected")
+        );
+
+
+    const id =
+        type === "basic"
+            ? "towerBasic"
+            : type === "fire"
+                ? "towerFire"
+                : "towerIce";
+
+
+    document
+        .getElementById(id)
+        .classList.add("selected");
+
+
+    document.getElementById("message")
+        .textContent =
+        "点击地图选择建造位置";
+
+}
+
+
+/* =====================================================
+   地图点击
+   ===================================================== */
+
+canvas.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            !selectedTower ||
+            paused ||
+            gameEnded
+        ) {
+
+            return;
+
+        }
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const scaleX =
+            canvas.width / rect.width;
+
+        const scaleY =
+            canvas.height / rect.height;
+
+
+        const x =
+            (event.clientX - rect.left) *
+            scaleX;
+
+        const y =
+            (event.clientY - rect.top) *
+            scaleY;
+
+
+        if (isOnPath(x, y)) {
+
+            document.getElementById("message")
+                .textContent =
+                "❌ 这里是敌人的行进路线";
+
+            return;
+
+        }
+
+
+        for (const tower of towers) {
+
+            const distance =
+                Math.hypot(
+                    tower.x - x,
+                    tower.y - y
+                );
+
+
+            if (distance < 42) {
+
+                document.getElementById("message")
+                    .textContent =
+                    "❌ 这里已经有炮塔";
+
+                return;
+
+            }
+
+        }
+
+
+        const data =
+            towerTypes[selectedTower];
+
+
+        if (gold < data.cost) {
+
+            document.getElementById("message")
+                .textContent =
+                "💰 金币不足";
+
+            return;
+
+        }
+
+
+        gold -= data.cost;
+
+
+        towers.push({
+
+            x: x,
+
+            y: y,
+
+            type: selectedTower,
+
+            cooldown: 0,
+
+            level: 1
+
+        });
+
+
+        document.getElementById("message")
+            .textContent =
+            "🗼 炮塔建造成功";
+
+
+        updateUI();
+
+    }
+);
+
+
+/* =====================================================
+   判断位置是否在道路上
+   ===================================================== */
+
+function isOnPath(x, y) {
+
+    for (
+        let i = 0;
+        i < path.length - 1;
+        i++
+    ) {
+
+        const a = path[i];
+
+        const b = path[i + 1];
+
+
+        const minX =
+            Math.min(a.x, b.x) - 30;
+
+        const maxX =
+            Math.max(a.x, b.x) + 30;
+
+        const minY =
+            Math.min(a.y, b.y) - 30;
+
+        const maxY =
+            Math.max(a.y, b.y) + 30;
+
+
+        if (
+            x >= minX &&
+            x <= maxX &&
+            y >= minY &&
+            y <= maxY
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =====================================================
+   更新敌人
+   ===================================================== */
+
+function updateEnemies(dt) {
+
+    for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const enemy = enemies[i];
+
+
+        /*
+         * 最重要的终点判断：
+         *
+         * enemy.target >= path.length
+         *
+         * 说明敌人已经走完整条路线，
+         * 已经到达城堡入口。
+         */
+
+        if (
+            enemy.target >= path.length
+        ) {
+
+            reachCastle(i);
+
+            continue;
+
+        }
+
+
+        const target =
+            path[enemy.target];
+
+
+        const dx =
+            target.x - enemy.x;
+
+        const dy =
+            target.y - enemy.y;
+
+        const distance =
+            Math.hypot(dx, dy);
+
+
+        const move =
+            enemy.speed *
+            enemy.slow *
+            dt / 1000;
+
+
+        if (distance <= move) {
+
+            enemy.x = target.x;
+
+            enemy.y = target.y;
+
+            enemy.target++;
+
+
+            /*
+             * 到达最后一个路线点
+             * 立即进入城堡判定。
+             */
+
+            if (
+                enemy.target >= path.length
+            ) {
+
+                reachCastle(i);
+
+            }
+
+        }
+        else {
+
+            enemy.x +=
+                dx / distance * move;
+
+            enemy.y +=
+                dy / distance * move;
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   敌人进入城堡
+   ===================================================== */
+
+function reachCastle(index) {
+
+    if (
+        index < 0 ||
+        index >= enemies.length
+    ) {
+
+        return;
+
+    }
+
+
+    enemies.splice(index, 1);
+
+
+    hp--;
+
+
+    if (hp < 0) {
+
+        hp = 0;
+
+    }
+
+
+    /*
+     * 城堡被攻破
+     */
+
+    if (hp <= 0) {
+
+        showResult(
+            "💀 城堡失守",
+            "敌人已经突破防线，JZ 城堡被攻破！"
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById("message")
+        .textContent =
+        "⚠️ 敌人突破防线！城堡生命 -1";
+
+}
+
+
+/* =====================================================
+   更新炮塔
+   ===================================================== */
+
+function updateTowers(dt) {
+
+    for (const tower of towers) {
+
+        tower.cooldown -= dt;
+
+
+        if (tower.cooldown > 0) {
+
+            continue;
+
+        }
+
+
+        const data =
+            towerTypes[tower.type];
+
+
+        let target = null;
+
+        let bestDistance = Infinity;
+
+
+        for (const enemy of enemies) {
+
+            const distance =
+                Math.hypot(
+                    enemy.x - tower.x,
+                    enemy.y - tower.y
+                );
+
+
+            if (
+                distance <= data.range &&
+                distance < bestDistance
+            ) {
+
+                bestDistance = distance;
+
+                target = enemy;
+
+            }
+
+        }
+
+
+        if (target) {
+
+            bullets.push({
+
+                x: tower.x,
+
+                y: tower.y,
+
+                target: target,
+
+                damage:
+                    data.damage *
+                    (
+                        1 +
+                        (tower.level - 1) * 0.35
+                    ),
+
+                speed: 500,
+
+                type: tower.type
+
+            });
+
+
+            tower.cooldown =
+                data.cooldown;
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   更新子弹
+   ===================================================== */
+
+function updateBullets(dt) {
+
+    for (
+        let i = bullets.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const bullet = bullets[i];
+
+
+        if (
+            !enemies.includes(
+                bullet.target
+            )
+        ) {
+
+            bullets.splice(i, 1);
+
+            continue;
+
+        }
+
+
+        const target =
+            bullet.target;
+
+
+        const dx =
+            target.x - bullet.x;
+
+        const dy =
+            target.y - bullet.y;
+
+
+        const distance =
+            Math.hypot(dx, dy);
+
+
+        const move =
+            bullet.speed *
+            dt / 1000;
+
+
+        if (distance <= move) {
+
+            target.hp -= bullet.damage;
+
+
+            /*
+             * 冰冻效果
+             */
+
+            if (
+                bullet.type === "ice"
+            ) {
+
+                target.slow = 0.55;
+
+                setTimeout(
+                    () => {
+
+                        if (
+                            enemies.includes(
+                                target
+                            )
+                        ) {
+
+                            target.slow = 1;
+
+                        }
+
+                    },
+                    1000
+                );
+
+            }
+
+
+            /*
+             * 敌人死亡
+             */
+
+            if (target.hp <= 0) {
+
+                gold += target.reward;
+
+
+                const index =
+                    enemies.indexOf(
+                        target
+                    );
+
+
+                if (index !== -1) {
+
+                    enemies.splice(
+                        index,
+                        1
+                    );
+
+                }
+
+            }
+
+
+            bullets.splice(i, 1);
+
+        }
+        else {
+
+            bullet.x +=
+                dx / distance * move;
+
+            bullet.y +=
+                dy / distance * move;
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   游戏更新
+   ===================================================== */
+
+function update(dt) {
+
+    if (
+        paused ||
+        gameEnded
+    ) {
+
+        return;
+
+    }
+
+
+    dt *= speed;
+
+
+    /*
+     * 生成敌人
+     */
+
+    if (waveRunning) {
+
+        spawnTimer -= dt;
+
+
+        if (
+            spawnTimer <= 0 &&
+            enemiesToSpawn > 0
+        ) {
+
+            spawnEnemy();
+
+            spawnTimer = 650;
+
+        }
+
+
+        /*
+         * 一波结束：
+         *
+         * 1. 所有敌人已经生成
+         * 2. 场上没有敌人
+         * 3. 城堡还活着
+         */
+
+        if (
+            waveRunning &&
+            enemiesToSpawn === 0 &&
+            enemies.length === 0 &&
+            hp > 0
+        ) {
+
+            waveRunning = false;
+
+            gold += 50;
+
+
+            document.getElementById("message")
+                .textContent =
+                `🌊 第 ${wave} 波完成！奖励 💰50`;
+
+        }
+
+    }
+
+
+    updateEnemies(dt);
+
+    updateTowers(dt);
+
+    updateBullets(dt);
+
+
+    updateUI();
+
+}
+
+
+/* =====================================================
+   绘制地图
+   ===================================================== */
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+     * 背景
+     */
+
+    ctx.fillStyle =
+        "#0d1319";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /*
+     * 网格
+     */
+
+    ctx.strokeStyle =
+        "#18212a";
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let x = 0;
+        x < 800;
+        x += 40
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(x, 0);
+
+        ctx.lineTo(x, 520);
+
+        ctx.stroke();
+
+    }
+
+
+    for (
+        let y = 0;
+        y < 520;
+        y += 40
+    ) {
+
+        ctx.beginPath();
+
+        ctx.moveTo(0, y);
+
+        ctx.lineTo(800, y);
+
+        ctx.stroke();
+
+    }
+
+
+    /*
+     * 道路
+     */
+
+    drawRoad();
+
+
+    /*
+     * 城堡
+     */
+
+    drawCastle();
+
+
+    /*
+     * 炮塔
+     */
+
+    drawTowers();
+
+
+    /*
+     * 敌人
+     */
+
+    drawEnemies();
+
+
+    /*
+     * 子弹
+     */
+
+    drawBullets();
+
+}
+
+
+/* =====================================================
+   绘制道路
+   ===================================================== */
+
+function drawRoad() {
+
+    ctx.lineCap = "round";
+
+    ctx.lineJoin = "round";
+
+
+    ctx.strokeStyle =
+        "#353b42";
+
+    ctx.lineWidth = 58;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        path[0].x,
+        path[0].y
+    );
+
+
+    for (
+        let i = 1;
+        i < path.length;
+        i++
+    ) {
+
+        ctx.lineTo(
+            path[i].x,
+            path[i].y
+        );
+
+    }
+
+
+    ctx.stroke();
+
+
+    ctx.strokeStyle =
+        "#262d34";
+
+    ctx.lineWidth = 48;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        path[0].x,
+        path[0].y
+    );
+
+
+    for (
+        let i = 1;
+        i < path.length;
+        i++
+    ) {
+
+        ctx.lineTo(
+            path[i].x,
+            path[i].y
+        );
+
+    }
+
+
+    ctx.stroke();
+
+}
+
+
+/* =====================================================
+   绘制城堡
+   ===================================================== */
+
+function drawCastle() {
+
+    /*
+     * 城堡入口区域
+     */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        castle.x,
+        castle.y,
+        castle.radius,
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fillStyle =
+        "rgba(255,80,80,.08)";
+
+    ctx.fill();
+
+
+    ctx.strokeStyle =
+        "rgba(255,100,100,.35)";
+
+    ctx.stroke();
+
+
+    ctx.font =
+        "42px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.textBaseline =
+        "middle";
+
+
+    ctx.fillText(
+        "🏰",
+        castle.x,
+        castle.y
+    );
+
+
+    ctx.textAlign =
+        "left";
+
+    ctx.textBaseline =
+        "alphabetic";
+
+}
+
+
+/* =====================================================
+   绘制炮塔
+   ===================================================== */
+
+function drawTowers() {
+
+    for (const tower of towers) {
+
+        const data =
+            towerTypes[tower.type];
+
+
+        /*
+         * 攻击范围
+         */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            tower.x,
+            tower.y,
+            data.range,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            "rgba(255,255,255,.025)";
+
+        ctx.fill();
+
+
+        ctx.strokeStyle =
+            "rgba(255,255,255,.12)";
+
+        ctx.stroke();
+
+
+        /*
+         * 炮塔底座
+         */
+
+        ctx.beginPath();
+
+        ctx.arc(
+            tower.x,
+            tower.y,
+            20,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            data.color;
+
+        ctx.fill();
+
+
+        ctx.strokeStyle =
+            "#fff";
+
+        ctx.lineWidth = 2;
+
+        ctx.stroke();
+
+
+        /*
+         * 图标
+         */
+
+        ctx.font =
+            "18px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+
+        const icon =
+            tower.type === "basic"
+                ? "🏹"
+                : tower.type === "fire"
+                    ? "🔥"
+                    : "❄️";
+
+
+        ctx.fillText(
+            icon,
+            tower.x,
+            tower.y
+        );
+
+
+        ctx.textAlign =
+            "left";
+
+        ctx.textBaseline =
+            "alphabetic";
+
+    }
+
+}
+
+
+/* =====================================================
+   绘制敌人
+   ===================================================== */
+
+function drawEnemies() {
+
+    for (const enemy of enemies) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            enemy.x,
+            enemy.y,
+            enemy.radius,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            enemy.type === "tank"
+                ? "#9b65ff"
+                : enemy.type === "fast"
+                    ? "#ffb65c"
+                    : "#ff5d68";
+
+
+        ctx.fill();
+
+
+        /*
+         * 血条
+         */
+
+        const width = 32;
+
+        const hpPercent =
+            Math.max(
+                0,
+                enemy.hp /
+                enemy.maxHp
+            );
+
+
+        ctx.fillStyle =
+            "#222";
+
+        ctx.fillRect(
+            enemy.x - width / 2,
+            enemy.y - enemy.radius - 9,
+            width,
+            5
+        );
+
+
+        ctx.fillStyle =
+            "#65d98b";
+
+        ctx.fillRect(
+            enemy.x - width / 2,
+            enemy.y - enemy.radius - 9,
+            width * hpPercent,
+            5
+        );
+
+
+        /*
+         * 敌人图标
+         */
+
+        ctx.font =
+            enemy.type === "tank"
+                ? "16px Arial"
+                : "14px Arial";
+
+
+        ctx.textAlign =
+            "center";
+
+        ctx.textBaseline =
+            "middle";
+
+
+        ctx.fillText(
+            "👾",
+            enemy.x,
+            enemy.y
+        );
+
+
+        ctx.textAlign =
+            "left";
+
+        ctx.textBaseline =
+            "alphabetic";
+
+    }
+
+}
+
+
+/* =====================================================
+   绘制子弹
+   ===================================================== */
+
+function drawBullets() {
+
+    for (const bullet of bullets) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            5,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.fillStyle =
+            bullet.type === "fire"
+                ? "#ff704f"
+                : bullet.type === "ice"
+                    ? "#72cfff"
+                    : "#eee";
+
+
+        ctx.fill();
+
+    }
+
+}
+
+
+/* =====================================================
+   UI
+   ===================================================== */
+
+function updateUI() {
+
+    document.getElementById("hp")
+        .textContent =
+        Math.max(0, hp);
+
+
+    document.getElementById("gold")
+        .textContent =
+        Math.floor(gold);
+
+
+    document.getElementById("wave")
+        .textContent =
+        wave;
+
+
+    document.getElementById("enemyCount")
+        .textContent =
+        enemies.length;
+
+}
+
+
+/* =====================================================
+   暂停
+   ===================================================== */
+
+function togglePause() {
+
+    if (gameEnded) {
+
+        return;
+
+    }
+
+
+    paused = !paused;
+
+
+    document.getElementById("message")
+        .textContent =
+        paused
+            ? "⏸ 游戏已暂停"
+            : "▶ 游戏继续";
+
+}
+
+
+/* =====================================================
+   游戏速度
+   ===================================================== */
+
+function toggleSpeed() {
+
+    if (gameEnded) {
+
+        return;
+
+    }
+
+
+    speed =
+        speed === 1
+            ? 2
+            : 1;
+
+
+    document.getElementById("speedText")
+        .textContent =
+        speed + "x";
+
+}
+
+
+/* =====================================================
+   游戏结束
+   ===================================================== */
+
+function showResult(title, text) {
+
+    if (gameEnded) {
+
+        return;
+
+    }
+
+
+    gameEnded = true;
+
+    paused = true;
+
+
+    document.getElementById("resultTitle")
+        .textContent =
+        title;
+
+
+    document.getElementById("resultText")
+        .textContent =
+        text;
+
+
+    document.getElementById("overlay")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   重新开始
+   ===================================================== */
+
+function restartGame() {
+
+    hp = 20;
+
+    gold = 300;
+
+    wave = 0;
+
+    enemies = [];
+
+    towers = [];
+
+    bullets = [];
+
+    selectedTower = null;
+
+    waveRunning = false;
+
+    enemiesToSpawn = 0;
+
+    spawnTimer = 0;
+
+    paused = false;
+
+    speed = 1;
+
+    gameEnded = false;
+
+    lastTime = 0;
+
+
+    document.getElementById("overlay")
+        .classList.remove("show");
+
+
+    document.getElementById("speedText")
+        .textContent =
+        "1x";
+
+
+    document.getElementById("message")
+        .textContent =
+        "选择炮塔，然后点击地图建造";
+
+
+    document
+        .querySelectorAll(".tower")
+        .forEach(el =>
+            el.classList.remove("selected")
+        );
+
+
+    updateUI();
+
+}
+
+
+/* =====================================================
+   游戏循环
+   ===================================================== */
+
+function gameLoop(time) {
+
+    if (!lastTime) {
+
+        lastTime = time;
+
+    }
+
+
+    const dt =
+        Math.min(
+            time - lastTime,
+            50
+        );
+
+
+    lastTime = time;
+
+
+    update(dt);
+
+    draw();
+
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =====================================================
+   启动
+   ===================================================== */
+
+restartGame();
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+</html>

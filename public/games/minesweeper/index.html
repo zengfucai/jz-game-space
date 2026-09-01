@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JZ 扫雷</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #090b0f;
+    color: #f5f5f5;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-container {
+    width: min(650px, 100%);
+    background: #11151b;
+    border: 1px solid #292f38;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 25px 80px rgba(0,0,0,.5);
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.back {
+    color: #aaa;
+    text-decoration: none;
+    border: 1px solid #303640;
+    padding: 8px 13px;
+    border-radius: 9px;
+}
+
+.back:hover {
+    color: white;
+    border-color: #666;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 22px;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0b0e13;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 15px;
+}
+
+.info strong {
+    font-size: 20px;
+}
+
+.mine-count {
+    color: #ff7777;
+}
+
+.timer {
+    color: #aaa;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+    background: #07090c;
+    padding: 6px;
+    border-radius: 12px;
+    max-width: 520px;
+    margin: auto;
+}
+
+.cell {
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 5px;
+    background: #292f38;
+    color: white;
+    font-size: clamp(13px, 3vw, 22px);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cell:hover {
+    background: #383f4a;
+}
+
+.cell.open {
+    background: #11151b;
+    cursor: default;
+}
+
+.cell.mine {
+    background: #6e2020;
+}
+
+.cell.flag {
+    color: #ff6565;
+}
+
+.n1 { color: #72a7ff; }
+.n2 { color: #65d38b; }
+.n3 { color: #ff7777; }
+.n4 { color: #b38cff; }
+.n5 { color: #ff9c65; }
+.n6 { color: #65d8d8; }
+.n7 { color: #eee; }
+.n8 { color: #888; }
+
+.message {
+    text-align: center;
+    min-height: 30px;
+    margin: 15px;
+    color: #aaa;
+}
+
+.restart {
+    display: block;
+    margin: auto;
+    border: 0;
+    background: #f2f2f2;
+    color: #111;
+    padding: 11px 22px;
+    border-radius: 9px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.restart:hover {
+    background: #ccc;
+}
+
+.tip {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-top: 18px;
+}
+
+@media (max-width: 500px) {
+    .game-container {
+        padding: 15px;
+    }
+
+    .board {
+        gap: 2px;
+        padding: 4px;
+    }
+
+    .cell {
+        border-radius: 3px;
+    }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="game-container">
+
+```
+<div class="top">
+    <a class="back" href="/">← 游戏空间</a>
+    <span>JZ · 益智</span>
+</div>
+
+<h1>💣 JZ 扫雷</h1>
+
+<p class="subtitle">
+    找出所有地雷，安全完成挑战
+</p>
+
+<div class="info">
+    <div>
+        💣 剩余：
+        <strong class="mine-count" id="mineCount">15</strong>
+    </div>
+
+    <div>
+        ⏱️
+        <strong class="timer" id="timer">0</strong>
+    </div>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="message" id="message">
+    左键翻开 · 右键插旗
+</div>
+
+<button class="restart" onclick="startGame()">
+    重新开始
+</button>
+
+<div class="tip">
+    JZ GAME SPACE · MINESWEEPER
+</div>
+```
+
+</div>
+
+<script>
+
+const SIZE = 10;
+const MINES = 15;
+
+let cells = [];
+let gameOver = false;
+let flags = 0;
+let seconds = 0;
+let timer = null;
+
+
+/* =========================
+   开始游戏
+========================= */
+
+function startGame() {
+
+    clearInterval(timer);
+
+    cells = [];
+    gameOver = false;
+    flags = 0;
+    seconds = 0;
+
+    document.getElementById("timer").textContent = "0";
+    document.getElementById("mineCount").textContent = MINES;
+    document.getElementById("message").textContent =
+        "左键翻开 · 右键插旗";
+
+    // 创建格子
+    for (let i = 0; i < SIZE * SIZE; i++) {
+
+        cells.push({
+            mine: false,
+            open: false,
+            flag: false,
+            number: 0
+        });
+
+    }
+
+    // 随机生成地雷
+    let mines = 0;
+
+    while (mines < MINES) {
+
+        const index =
+            Math.floor(Math.random() * cells.length);
+
+        if (!cells[index].mine) {
+
+            cells[index].mine = true;
+            mines++;
+
+        }
+
+    }
+
+    // 计算数字
+    for (let i = 0; i < cells.length; i++) {
+
+        if (!cells[i].mine) {
+
+            cells[i].number =
+                getNeighbors(i)
+                    .filter(index => cells[index].mine)
+                    .length;
+
+        }
+
+    }
+
+    render();
+
+    timer = setInterval(() => {
+
+        if (!gameOver) {
+
+            seconds++;
+
+            document.getElementById("timer")
+                .textContent = seconds;
+
+        }
+
+    }, 1000);
+
+}
+
+
+/* =========================
+   获取周围格子
+========================= */
+
+function getNeighbors(index) {
+
+    const row = Math.floor(index / SIZE);
+    const col = index % SIZE;
+
+    const result = [];
+
+    for (let r = -1; r <= 1; r++) {
+
+        for (let c = -1; c <= 1; c++) {
+
+            if (r === 0 && c === 0) {
+                continue;
+            }
+
+            const newRow = row + r;
+            const newCol = col + c;
+
+            if (
+                newRow >= 0 &&
+                newRow < SIZE &&
+                newCol >= 0 &&
+                newCol < SIZE
+            ) {
+
+                result.push(
+                    newRow * SIZE + newCol
+                );
+
+            }
+
+        }
+
+    }
+
+    return result;
+
+}
+
+
+/* =========================
+   左键翻开
+========================= */
+
+function openCell(index) {
+
+    if (gameOver) return;
+
+    const cell = cells[index];
+
+    if (cell.open || cell.flag) {
+        return;
+    }
+
+    cell.open = true;
+
+    // 踩雷
+    if (cell.mine) {
+
+        gameOver = true;
+
+        cells.forEach(cell => {
+
+            if (cell.mine) {
+                cell.open = true;
+            }
+
+        });
+
+        document.getElementById("message")
+            .textContent = "💥 你踩到雷了！";
+
+        clearInterval(timer);
+
+        render();
+
+        return;
+    }
+
+    // 空白区域自动展开
+    if (cell.number === 0) {
+
+        getNeighbors(index).forEach(neighbor => {
+
+            if (
+                !cells[neighbor].mine &&
+                !cells[neighbor].open
+            ) {
+
+                openCell(neighbor);
+
+            }
+
+        });
+
+    }
+
+    checkWin();
+
+    render();
+
+}
+
+
+/* =========================
+   右键插旗
+========================= */
+
+function toggleFlag(event, index) {
+
+    event.preventDefault();
+
+    if (gameOver) return;
+
+    const cell = cells[index];
+
+    if (cell.open) {
+        return;
+    }
+
+    cell.flag = !cell.flag;
+
+    flags += cell.flag ? 1 : -1;
+
+    document.getElementById("mineCount")
+        .textContent = MINES - flags;
+
+    render();
+
+}
+
+
+/* =========================
+   判断胜利
+========================= */
+
+function checkWin() {
+
+    const safeCells =
+        cells.filter(cell =>
+            !cell.mine && cell.open
+        ).length;
+
+    if (safeCells === cells.length - MINES) {
+
+        gameOver = true;
+
+        clearInterval(timer);
+
+        cells.forEach(cell => {
+
+            if (cell.mine) {
+                cell.flag = true;
+            }
+
+        });
+
+        document.getElementById("mineCount")
+            .textContent = "0";
+
+        document.getElementById("message")
+            .textContent =
+            `🎉 挑战成功！用时 ${seconds} 秒`;
+
+        render();
+
+    }
+
+}
+
+
+/* =========================
+   页面绘制
+========================= */
+
+function render() {
+
+    const board =
+        document.getElementById("board");
+
+    board.innerHTML = "";
+
+    cells.forEach((cell, index) => {
+
+        const button =
+            document.createElement("button");
+
+        button.className = "cell";
+
+        // 已翻开
+        if (cell.open) {
+
+            button.classList.add("open");
+
+            if (cell.mine) {
+
+                button.classList.add("mine");
+
+                button.textContent = "💣";
+
+            } else if (cell.number > 0) {
+
+                button.textContent = cell.number;
+
+                button.classList.add(
+                    "n" + cell.number
+                );
+
+            }
+
+        }
+
+        // 插旗
+        else if (cell.flag) {
+
+            button.classList.add("flag");
+
+            button.textContent = "🚩";
+
+        }
+
+        button.addEventListener(
+            "click",
+            () => openCell(index)
+        );
+
+        button.addEventListener(
+            "contextmenu",
+            event => toggleFlag(event, index)
+        );
+
+        board.appendChild(button);
+
+    });
+
+}
+
+
+startGame();
+
+</script>
+
+</body>
+</html>

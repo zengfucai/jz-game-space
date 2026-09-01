@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JZ 五子棋</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: #090b0f;
+    color: #f5f5f5;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-container {
+    width: min(680px, 100%);
+    background: #11151b;
+    border: 1px solid #292f38;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 25px 80px rgba(0,0,0,.5);
+}
+
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.back {
+    color: #aaa;
+    text-decoration: none;
+    border: 1px solid #303640;
+    padding: 8px 13px;
+    border-radius: 9px;
+}
+
+.back:hover {
+    color: white;
+    border-color: #666;
+}
+
+h1 {
+    text-align: center;
+    margin: 10px 0 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0b0e13;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+}
+
+.status {
+    color: #aaa;
+}
+
+.turn {
+    font-weight: bold;
+}
+
+.board-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.board {
+    width: min(600px, 100%);
+    aspect-ratio: 1;
+    background:
+        linear-gradient(#c79b62 1px, transparent 1px),
+        linear-gradient(90deg, #c79b62 1px, transparent 1px);
+    background-size: calc(100% / 14) calc(100% / 14);
+    background-color: #d8ad73;
+    border: 8px solid #8e6439;
+    border-radius: 8px;
+    padding: 0;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(15, 1fr);
+    grid-template-rows: repeat(15, 1fr);
+}
+
+.cell {
+    border: none;
+    background: transparent;
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+}
+
+.cell:hover::after {
+    content: "";
+    position: absolute;
+    width: 55%;
+    height: 55%;
+    left: 22.5%;
+    top: 22.5%;
+    border-radius: 50%;
+    background: rgba(255,255,255,.25);
+}
+
+.stone {
+    position: absolute;
+    width: 76%;
+    height: 76%;
+    left: 12%;
+    top: 12%;
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow:
+        inset -4px -5px 8px rgba(0,0,0,.35),
+        2px 3px 5px rgba(0,0,0,.3);
+}
+
+.black {
+    background: #101010;
+}
+
+.white {
+    background: #f5f5f5;
+    border: 1px solid #aaa;
+}
+
+.last::before {
+    content: "";
+    position: absolute;
+    width: 20%;
+    height: 20%;
+    left: 40%;
+    top: 40%;
+    background: #e33;
+    border-radius: 50%;
+    z-index: 3;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+button.control {
+    border: 1px solid #303640;
+    background: #1b2028;
+    color: #eee;
+    padding: 11px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.control:hover {
+    background: #292f38;
+}
+
+button.restart {
+    background: #f2f2f2;
+    color: #111;
+    border-color: #f2f2f2;
+    font-weight: bold;
+}
+
+button.restart:hover {
+    background: #ccc;
+}
+
+.message {
+    text-align: center;
+    min-height: 28px;
+    margin-top: 15px;
+    color: #aaa;
+}
+
+.tip {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin-top: 15px;
+}
+
+@media (max-width: 500px) {
+
+    body {
+        padding: 10px;
+    }
+
+    .game-container {
+        padding: 15px;
+    }
+
+    .board {
+        border-width: 5px;
+    }
+
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="game-container">
+
+```
+<div class="top">
+    <a href="/" class="back">← 游戏空间</a>
+    <span>JZ · 益智</span>
+</div>
+
+<h1>❌⭕ JZ 五子棋</h1>
+
+<p class="subtitle">
+    黑白双方轮流落子，先连成五子者获胜
+</p>
+
+<div class="info">
+
+    <div>
+        当前：
+        <span id="turn" class="turn">⚫ 黑棋</span>
+    </div>
+
+    <div class="status">
+        15 × 15 棋盘
+    </div>
+
+</div>
+
+<div class="board-wrapper">
+    <div class="board" id="board"></div>
+</div>
+
+<div class="message" id="message">
+    黑棋先手
+</div>
+
+<div class="controls">
+
+    <button
+        class="control restart"
+        onclick="restartGame()"
+    >
+        重新开始
+    </button>
+
+</div>
+
+<div class="tip">
+    JZ GAME SPACE · GOMOKU
+</div>
+```
+
+</div>
+
+<script>
+
+const SIZE = 15;
+
+let board = [];
+let currentPlayer = 1;
+let gameOver = false;
+let lastMove = null;
+
+
+/* =========================
+   初始化
+========================= */
+
+function initGame() {
+
+    board = [];
+
+    for (let row = 0; row < SIZE; row++) {
+
+        board[row] = [];
+
+        for (let col = 0; col < SIZE; col++) {
+
+            board[row][col] = 0;
+
+        }
+
+    }
+
+    currentPlayer = 1;
+    gameOver = false;
+    lastMove = null;
+
+    document.getElementById("message")
+        .textContent = "黑棋先手";
+
+    updateTurn();
+
+    render();
+
+}
+
+
+/* =========================
+   绘制棋盘
+========================= */
+
+function render() {
+
+    const boardElement =
+        document.getElementById("board");
+
+    boardElement.innerHTML = "";
+
+    for (let row = 0; row < SIZE; row++) {
+
+        for (let col = 0; col < SIZE; col++) {
+
+            const cell =
+                document.createElement("button");
+
+            cell.className = "cell";
+
+            cell.addEventListener(
+                "click",
+                () => placeStone(row, col)
+            );
+
+            const value = board[row][col];
+
+            if (value !== 0) {
+
+                const stone =
+                    document.createElement("div");
+
+                stone.classList.add("stone");
+
+                if (value === 1) {
+                    stone.classList.add("black");
+                } else {
+                    stone.classList.add("white");
+                }
+
+                if (
+                    lastMove &&
+                    lastMove.row === row &&
+                    lastMove.col === col
+                ) {
+                    stone.classList.add("last");
+                }
+
+                cell.appendChild(stone);
+
+            }
+
+            boardElement.appendChild(cell);
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   落子
+========================= */
+
+function placeStone(row, col) {
+
+    if (gameOver) {
+        return;
+    }
+
+    if (board[row][col] !== 0) {
+        return;
+    }
+
+    board[row][col] = currentPlayer;
+
+    lastMove = {
+        row,
+        col
+    };
+
+    render();
+
+    // 判断胜负
+    if (checkWin(row, col)) {
+
+        gameOver = true;
+
+        const winner =
+            currentPlayer === 1
+                ? "⚫ 黑棋"
+                : "⚪ 白棋";
+
+        document.getElementById("message")
+            .textContent =
+            `🎉 ${winner}获胜！`;
+
+        document.getElementById("turn")
+            .textContent =
+            `${winner} 获胜`;
+
+        return;
+
+    }
+
+    // 判断和棋
+    if (isDraw()) {
+
+        gameOver = true;
+
+        document.getElementById("message")
+            .textContent =
+            "🤝 棋盘已满，平局！";
+
+        document.getElementById("turn")
+            .textContent =
+            "平局";
+
+        return;
+
+    }
+
+    // 换手
+    currentPlayer =
+        currentPlayer === 1 ? 2 : 1;
+
+    updateTurn();
+
+    document.getElementById("message")
+        .textContent =
+        currentPlayer === 1
+            ? "轮到黑棋"
+            : "轮到白棋";
+
+    render();
+
+}
+
+
+/* =========================
+   判断胜利
+========================= */
+
+function checkWin(row, col) {
+
+    const player =
+        board[row][col];
+
+    const directions = [
+        [1, 0],
+        [0, 1],
+        [1, 1],
+        [1, -1]
+    ];
+
+    for (const [dr, dc] of directions) {
+
+        let count = 1;
+
+        count += countDirection(
+            row,
+            col,
+            dr,
+            dc,
+            player
+        );
+
+        count += countDirection(
+            row,
+            col,
+            -dr,
+            -dc,
+            player
+        );
+
+        if (count >= 5) {
+            return true;
+        }
+
+    }
+
+    return false;
+
+}
+
+
+/* =========================
+   计算连续棋子
+========================= */
+
+function countDirection(
+    row,
+    col,
+    dr,
+    dc,
+    player
+) {
+
+    let count = 0;
+
+    let r = row + dr;
+    let c = col + dc;
+
+    while (
+        r >= 0 &&
+        r < SIZE &&
+        c >= 0 &&
+        c < SIZE &&
+        board[r][c] === player
+    ) {
+
+        count++;
+
+        r += dr;
+        c += dc;
+
+    }
+
+    return count;
+
+}
+
+
+/* =========================
+   判断平局
+========================= */
+
+function isDraw() {
+
+    for (let row = 0; row < SIZE; row++) {
+
+        for (let col = 0; col < SIZE; col++) {
+
+            if (board[row][col] === 0) {
+                return false;
+            }
+
+        }
+
+    }
+
+    return true;
+
+}
+
+
+/* =========================
+   更新当前玩家
+========================= */
+
+function updateTurn() {
+
+    document.getElementById("turn")
+        .textContent =
+        currentPlayer === 1
+            ? "⚫ 黑棋"
+            : "⚪ 白棋";
+
+}
+
+
+/* =========================
+   重新开始
+========================= */
+
+function restartGame() {
+
+    initGame();
+
+}
+
+
+initGame();
+
+</script>
+
+</body>
+</html>

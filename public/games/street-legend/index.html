@@ -1,0 +1,2577 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#090b12">
+
+    <title>JZ 街头传说</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #090b12;
+            font-family:
+                "Microsoft YaHei",
+                "Segoe UI",
+                Arial,
+                sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        #game-wrapper {
+            position: relative;
+            width: min(100vw, 1280px);
+            height: min(100vh, 720px);
+            background: #111827;
+            overflow: hidden;
+            box-shadow:
+                0 0 80px rgba(0, 0, 0, .7),
+                0 0 0 1px rgba(255,255,255,.08);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background: #111827;
+        }
+
+        /* =========================
+           HUD
+        ========================= */
+
+        #hud {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 18px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hud-left,
+        .hud-right {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .hud-right {
+            align-items: flex-end;
+        }
+
+        .game-logo {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .stage {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: #aab4c8;
+            font-weight: 700;
+        }
+
+        .health-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .health-label {
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .health-bar {
+            width: 230px;
+            height: 18px;
+            background: #252a35;
+            border: 2px solid #fff;
+            box-shadow: 3px 3px 0 #000;
+            overflow: hidden;
+        }
+
+        #player-health {
+            width: 100%;
+            height: 100%;
+            background: #35e17b;
+            transition: width .15s linear;
+        }
+
+        .score {
+            font-size: 18px;
+            font-weight: 900;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .combo {
+            min-height: 24px;
+            color: #ffd54a;
+            font-size: 14px;
+            font-weight: 900;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* =========================
+           Overlay
+        ========================= */
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 7, 13, .76);
+            backdrop-filter: blur(6px);
+        }
+
+        .overlay.hidden {
+            display: none;
+        }
+
+        .panel {
+            width: min(90%, 620px);
+            padding: 42px;
+            text-align: center;
+            background: rgba(17, 24, 39, .96);
+            border: 1px solid rgba(255,255,255,.14);
+            box-shadow:
+                0 30px 80px rgba(0,0,0,.6),
+                inset 0 0 40px rgba(255,255,255,.025);
+        }
+
+        .panel h1 {
+            font-size: clamp(38px, 7vw, 72px);
+            font-weight: 1000;
+            letter-spacing: 5px;
+            margin-bottom: 8px;
+            text-shadow:
+                5px 5px 0 #000;
+        }
+
+        .panel h2 {
+            font-size: 30px;
+            margin-bottom: 14px;
+        }
+
+        .panel p {
+            color: #aeb7c8;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .game-button {
+            border: 0;
+            padding: 15px 34px;
+            min-width: 180px;
+            color: #0a0d13;
+            background: #fff;
+            font-size: 15px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform .15s, background .15s;
+        }
+
+        .game-button:hover {
+            transform: translateY(-2px);
+            background: #ffd54a;
+        }
+
+        .controls {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,.1);
+            color: #929caf;
+            font-size: 13px;
+            line-height: 2;
+        }
+
+        kbd {
+            display: inline-block;
+            padding: 2px 7px;
+            margin: 0 2px;
+            border: 1px solid #4b5563;
+            background: #1f2937;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        /* =========================
+           Mobile controls
+        ========================= */
+
+        #mobile-controls {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 18px;
+            display: none;
+            justify-content: space-between;
+            padding: 0 18px;
+            z-index: 15;
+            pointer-events: none;
+        }
+
+        .mobile-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mobile-btn {
+            width: 58px;
+            height: 58px;
+            border: 1px solid rgba(255,255,255,.25);
+            background: rgba(0,0,0,.45);
+            color: #fff;
+            font-size: 21px;
+            font-weight: 900;
+            border-radius: 50%;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .mobile-btn.attack {
+            width: 64px;
+            height: 64px;
+            background: rgba(220, 50, 50, .65);
+        }
+
+        @media (max-width: 800px) {
+            #mobile-controls {
+                display: flex;
+            }
+
+            .health-bar {
+                width: 130px;
+            }
+
+            #hud {
+                padding: 12px;
+            }
+
+            .game-logo {
+                font-size: 15px;
+            }
+
+            .score {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .panel {
+                padding: 25px;
+            }
+
+            .panel h1 {
+                font-size: 38px;
+            }
+
+            .controls {
+                margin-top: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="game-wrapper">
+
+    <canvas id="game"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+
+        <div class="hud-left">
+
+            <div class="game-logo">
+                JZ STREET LEGEND
+            </div>
+
+            <div class="stage" id="stage-text">
+                STAGE 01 · CITY STREET
+            </div>
+
+            <div class="health-row">
+
+                <span class="health-label">HP</span>
+
+                <div class="health-bar">
+                    <div id="player-health"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="hud-right">
+
+            <div class="score">
+                SCORE <span id="score">000000</span>
+            </div>
+
+            <div class="combo" id="combo"></div>
+
+        </div>
+
+    </div>
+
+    <!-- 开始界面 -->
+    <div class="overlay" id="start-screen">
+
+        <div class="panel">
+
+            <h1>JZ</h1>
+
+            <h2>街头传说</h2>
+
+            <p>
+                一款复古横版清关动作游戏
+                <br>
+                击败街头敌人，突破城市封锁。
+            </p>
+
+            <button class="game-button" id="start-btn">
+                开始游戏
+            </button>
+
+            <div class="controls">
+                <kbd>←</kbd>
+                <kbd>→</kbd>
+                移动　
+                <kbd>↑</kbd>
+                <kbd>↓</kbd>
+                上下移动
+                <br>
+                <kbd>SPACE</kbd>
+                跳跃　
+                <kbd>J</kbd>
+                拳击　
+                <kbd>K</kbd>
+                踢腿　
+                <kbd>P</kbd>
+                暂停
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 暂停 -->
+    <div class="overlay hidden" id="pause-screen">
+
+        <div class="panel">
+
+            <h2>游戏暂停</h2>
+
+            <p>休息一下，准备继续战斗。</p>
+
+            <button class="game-button" id="resume-btn">
+                继续游戏
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- 游戏结束 -->
+    <div class="overlay hidden" id="gameover-screen">
+
+        <div class="panel">
+
+            <h2>GAME OVER</h2>
+
+            <p>
+                你倒下了。
+                <br>
+                最终得分：
+                <strong id="final-score">0</strong>
+            </p>
+
+            <button class="game-button" id="restart-btn">
+                再来一次
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- 通关 -->
+    <div class="overlay hidden" id="clear-screen">
+
+        <div class="panel">
+
+            <h2>STAGE CLEAR</h2>
+
+            <p>
+                恭喜！
+                <br>
+                你成功突破了城市街头。
+                <br>
+                最终得分：
+                <strong id="clear-score">0</strong>
+            </p>
+
+            <button class="game-button" id="clear-restart-btn">
+                再玩一次
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- 手机控制 -->
+    <div id="mobile-controls">
+
+        <div class="mobile-group">
+            <button class="mobile-btn" data-key="ArrowLeft">←</button>
+            <button class="mobile-btn" data-key="ArrowRight">→</button>
+            <button class="mobile-btn" data-key="ArrowUp">↑</button>
+            <button class="mobile-btn" data-key="ArrowDown">↓</button>
+        </div>
+
+        <div class="mobile-group">
+            <button class="mobile-btn attack" data-key="j">J</button>
+            <button class="mobile-btn attack" data-key="k">K</button>
+            <button class="mobile-btn" data-key=" ">跳</button>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+"use strict";
+
+/* =========================================================
+   JZ 街头传说
+   单文件 Canvas 游戏
+   ========================================================= */
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const wrapper = document.getElementById("game-wrapper");
+
+const startScreen = document.getElementById("start-screen");
+const pauseScreen = document.getElementById("pause-screen");
+const gameoverScreen = document.getElementById("gameover-screen");
+const clearScreen = document.getElementById("clear-screen");
+
+const startBtn = document.getElementById("start-btn");
+const resumeBtn = document.getElementById("resume-btn");
+const restartBtn = document.getElementById("restart-btn");
+const clearRestartBtn = document.getElementById("clear-restart-btn");
+
+const healthElement = document.getElementById("player-health");
+const scoreElement = document.getElementById("score");
+const comboElement = document.getElementById("combo");
+const stageElement = document.getElementById("stage-text");
+
+const finalScoreElement = document.getElementById("final-score");
+const clearScoreElement = document.getElementById("clear-score");
+
+
+/* =========================================================
+   游戏尺寸
+   ========================================================= */
+
+const W = 1280;
+const H = 720;
+
+canvas.width = W;
+canvas.height = H;
+
+
+/* =========================================================
+   世界
+   ========================================================= */
+
+const world = {
+    width: 7200,
+    groundY: 570
+};
+
+let cameraX = 0;
+
+let gameRunning = false;
+let paused = false;
+let gameEnded = false;
+let gameCleared = false;
+
+let score = 0;
+let combo = 0;
+let comboTimer = 0;
+
+let lastTime = 0;
+
+
+/* =========================================================
+   输入
+   ========================================================= */
+
+const keys = {};
+
+window.addEventListener("keydown", event => {
+
+    const key = event.key.length === 1
+        ? event.key.toLowerCase()
+        : event.key;
+
+    keys[key] = true;
+
+    if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "]
+            .includes(event.key)
+    ) {
+        event.preventDefault();
+    }
+
+    if (key === "p") {
+        togglePause();
+    }
+
+});
+
+window.addEventListener("keyup", event => {
+
+    const key = event.key.length === 1
+        ? event.key.toLowerCase()
+        : event.key;
+
+    keys[key] = false;
+
+});
+
+
+/* =========================================================
+   玩家
+   ========================================================= */
+
+let player;
+
+function createPlayer() {
+
+    return {
+
+        x: 260,
+        y: world.groundY - 100,
+
+        width: 48,
+        height: 100,
+
+        vx: 0,
+        vy: 0,
+
+        speed: 4.5,
+        jumpPower: -13,
+        gravity: 0.65,
+
+        hp: 100,
+        maxHp: 100,
+
+        facing: 1,
+
+        onGround: true,
+
+        attackTimer: 0,
+        attackCooldown: 0,
+
+        attackType: "",
+
+        hurtTimer: 0,
+
+        invincibleTimer: 0,
+
+        walkTime: 0
+
+    };
+
+}
+
+
+/* =========================================================
+   敌人
+   ========================================================= */
+
+let enemies = [];
+
+function createEnemy(x, type = "normal") {
+
+    if (type === "boss") {
+
+        return {
+
+            type: "boss",
+
+            x,
+            y: world.groundY - 135,
+
+            width: 70,
+            height: 135,
+
+            vx: 0,
+            vy: 0,
+
+            hp: 300,
+            maxHp: 300,
+
+            speed: 1.25,
+
+            attackCooldown: 0,
+
+            attackTimer: 0,
+
+            hurtTimer: 0,
+
+            facing: -1,
+
+            dead: false,
+
+            hitFlash: 0
+
+        };
+
+    }
+
+    return {
+
+        type: "normal",
+
+        x,
+        y: world.groundY - 90,
+
+        width: 45,
+        height: 90,
+
+        vx: 0,
+        vy: 0,
+
+        hp: 50,
+        maxHp: 50,
+
+        speed: 1.35 + Math.random() * .4,
+
+        attackCooldown: 0,
+
+        attackTimer: 0,
+
+        hurtTimer: 0,
+
+        facing: -1,
+
+        dead: false,
+
+        hitFlash: 0
+
+    };
+
+}
+
+
+/* =========================================================
+   初始化敌人
+   ========================================================= */
+
+function createLevel() {
+
+    enemies = [
+
+        createEnemy(850),
+        createEnemy(1120),
+        createEnemy(1420),
+        createEnemy(1740),
+        createEnemy(2080),
+        createEnemy(2350),
+        createEnemy(2670),
+
+        createEnemy(3100),
+        createEnemy(3400),
+        createEnemy(3700),
+        createEnemy(4000),
+
+        createEnemy(4450),
+        createEnemy(4750),
+        createEnemy(5050),
+
+        createEnemy(5550),
+        createEnemy(5800),
+
+        createEnemy(6350, "boss")
+
+    ];
+
+}
+
+
+/* =========================================================
+   粒子
+   ========================================================= */
+
+let particles = [];
+
+function spawnParticles(x, y, color, count = 8) {
+
+    for (let i = 0; i < count; i++) {
+
+        particles.push({
+
+            x,
+            y,
+
+            vx: (Math.random() - .5) * 8,
+            vy: (Math.random() - .5) * 8,
+
+            life: 25 + Math.random() * 25,
+
+            maxLife: 50,
+
+            size: 3 + Math.random() * 5,
+
+            color
+
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   开始游戏
+   ========================================================= */
+
+function startGame() {
+
+    player = createPlayer();
+
+    createLevel();
+
+    particles = [];
+
+    score = 0;
+    combo = 0;
+    comboTimer = 0;
+
+    cameraX = 0;
+
+    gameRunning = true;
+    paused = false;
+    gameEnded = false;
+    gameCleared = false;
+
+    startScreen.classList.add("hidden");
+    pauseScreen.classList.add("hidden");
+    gameoverScreen.classList.add("hidden");
+    clearScreen.classList.add("hidden");
+
+    updateHUD();
+
+}
+
+
+/* =========================================================
+   暂停
+   ========================================================= */
+
+function togglePause() {
+
+    if (!gameRunning || gameEnded || gameCleared) {
+        return;
+    }
+
+    paused = !paused;
+
+    pauseScreen.classList.toggle(
+        "hidden",
+        !paused
+    );
+
+}
+
+
+/* =========================================================
+   玩家更新
+   ========================================================= */
+
+function updatePlayer(dt) {
+
+    if (player.hurtTimer > 0) {
+        player.hurtTimer -= dt;
+    }
+
+    if (player.invincibleTimer > 0) {
+        player.invincibleTimer -= dt;
+    }
+
+    if (player.attackCooldown > 0) {
+        player.attackCooldown -= dt;
+    }
+
+    if (player.attackTimer > 0) {
+        player.attackTimer -= dt;
+    }
+
+    /* 移动 */
+
+    player.vx = 0;
+
+    if (keys["ArrowLeft"] || keys["a"]) {
+
+        player.vx = -player.speed;
+        player.facing = -1;
+
+    }
+
+    if (keys["ArrowRight"] || keys["d"]) {
+
+        player.vx = player.speed;
+        player.facing = 1;
+
+    }
+
+    if (keys["ArrowUp"] || keys["w"]) {
+        player.y -= player.speed * .65;
+    }
+
+    if (keys["ArrowDown"] || keys["s"]) {
+        player.y += player.speed * .65;
+    }
+
+    /* 跳跃 */
+
+    if (
+        (keys[" "] || keys["ArrowUp"]) &&
+        player.onGround &&
+        !player._jumpPressed
+    ) {
+
+        player.vy = player.jumpPower;
+        player.onGround = false;
+
+        player._jumpPressed = true;
+
+    }
+
+    if (!keys[" "] && !keys["ArrowUp"]) {
+        player._jumpPressed = false;
+    }
+
+    /* 重力 */
+
+    player.vy += player.gravity;
+
+    player.y += player.vy;
+
+    const minY = world.groundY - 130;
+    const maxY = world.groundY - player.height;
+
+    if (player.y >= maxY) {
+
+        player.y = maxY;
+
+        player.vy = 0;
+        player.onGround = true;
+
+    }
+
+    if (player.y < minY) {
+        player.y = minY;
+        player.vy = 0;
+    }
+
+    /* 世界边界 */
+
+    player.x += player.vx;
+
+    player.x = Math.max(
+        50,
+        Math.min(
+            world.width - 120,
+            player.x
+        )
+    );
+
+    if (Math.abs(player.vx) > 0) {
+        player.walkTime += dt;
+    }
+
+    /* 攻击 */
+
+    if (keys["j"] && !player._jPressed) {
+
+        attack("punch");
+
+        player._jPressed = true;
+
+    }
+
+    if (!keys["j"]) {
+        player._jPressed = false;
+    }
+
+    if (keys["k"] && !player._kPressed) {
+
+        attack("kick");
+
+        player._kPressed = true;
+
+    }
+
+    if (!keys["k"]) {
+        player._kPressed = false;
+    }
+
+}
+
+
+/* =========================================================
+   攻击
+   ========================================================= */
+
+function attack(type) {
+
+    if (player.attackCooldown > 0) {
+        return;
+    }
+
+    player.attackType = type;
+
+    player.attackTimer = 16;
+
+    player.attackCooldown =
+        type === "punch"
+            ? 18
+            : 28;
+
+    const attackRange =
+        type === "punch"
+            ? 75
+            : 95;
+
+    const damage =
+        type === "punch"
+            ? 18
+            : 28;
+
+    const attackX =
+        player.x +
+        player.facing * attackRange;
+
+    let hitSomething = false;
+
+    for (const enemy of enemies) {
+
+        if (enemy.dead) {
+            continue;
+        }
+
+        const dx =
+            Math.abs(
+                enemy.x -
+                attackX
+            );
+
+        const dy =
+            Math.abs(
+                enemy.y -
+                player.y
+            );
+
+        if (
+            dx < 70 &&
+            dy < 70
+        ) {
+
+            hitEnemy(
+                enemy,
+                damage
+            );
+
+            hitSomething = true;
+
+        }
+
+    }
+
+    if (hitSomething) {
+
+        combo++;
+        comboTimer = 90;
+
+    }
+
+}
+
+
+/* =========================================================
+   命中敌人
+   ========================================================= */
+
+function hitEnemy(enemy, damage) {
+
+    enemy.hp -= damage;
+
+    enemy.hurtTimer = 14;
+
+    enemy.hitFlash = 8;
+
+    enemy.vx =
+        player.facing *
+        7;
+
+    spawnParticles(
+        enemy.x,
+        enemy.y + enemy.height * .45,
+        "#ffd54a",
+        8
+    );
+
+    if (enemy.hp <= 0) {
+
+        enemy.dead = true;
+
+        const reward =
+            enemy.type === "boss"
+                ? 5000
+                : 500;
+
+        score +=
+            reward *
+            Math.max(1, combo);
+
+        spawnParticles(
+            enemy.x,
+            enemy.y + enemy.height * .4,
+            "#ff5b5b",
+            enemy.type === "boss"
+                ? 35
+                : 15
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   敌人更新
+   ========================================================= */
+
+function updateEnemies(dt) {
+
+    for (const enemy of enemies) {
+
+        if (enemy.dead) {
+            continue;
+        }
+
+        if (enemy.hurtTimer > 0) {
+
+            enemy.hurtTimer -= dt;
+
+            enemy.x += enemy.vx;
+
+            enemy.vx *= .88;
+
+            continue;
+
+        }
+
+        if (enemy.hitFlash > 0) {
+            enemy.hitFlash -= dt;
+        }
+
+        if (enemy.attackCooldown > 0) {
+            enemy.attackCooldown -= dt;
+        }
+
+        const dx =
+            player.x -
+            enemy.x;
+
+        const dy =
+            player.y -
+            enemy.y;
+
+        enemy.facing =
+            dx >= 0
+                ? 1
+                : -1;
+
+        /* 靠近玩家 */
+
+        if (Math.abs(dx) > 65) {
+
+            enemy.vx =
+                Math.sign(dx) *
+                enemy.speed;
+
+            enemy.x += enemy.vx;
+
+        } else {
+
+            enemy.vx = 0;
+
+            if (
+                Math.abs(dy) < 60 &&
+                enemy.attackCooldown <= 0
+            ) {
+
+                enemy.attackTimer = 15;
+
+                enemy.attackCooldown =
+                    enemy.type === "boss"
+                        ? 75
+                        : 100;
+
+                enemyAttack(enemy);
+
+            }
+
+        }
+
+        enemy.x =
+            Math.max(
+                50,
+                Math.min(
+                    world.width - 80,
+                    enemy.x
+                )
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   敌人攻击
+   ========================================================= */
+
+function enemyAttack(enemy) {
+
+    const range =
+        enemy.type === "boss"
+            ? 90
+            : 65;
+
+    const dx =
+        Math.abs(
+            player.x -
+            enemy.x
+        );
+
+    if (dx <= range) {
+
+        damagePlayer(
+            enemy.type === "boss"
+                ? 18
+                : 9
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   玩家受伤
+   ========================================================= */
+
+function damagePlayer(damage) {
+
+    if (
+        player.invincibleTimer > 0 ||
+        gameEnded
+    ) {
+        return;
+    }
+
+    player.hp -= damage;
+
+    player.invincibleTimer = 45;
+
+    player.hurtTimer = 18;
+
+    combo = 0;
+
+    spawnParticles(
+        player.x,
+        player.y + 45,
+        "#ff4545",
+        10
+    );
+
+    if (player.hp <= 0) {
+
+        player.hp = 0;
+
+        gameOver();
+
+    }
+
+}
+
+
+/* =========================================================
+   相机
+   ========================================================= */
+
+function updateCamera() {
+
+    const target =
+        player.x -
+        W * .35;
+
+    cameraX +=
+        (target - cameraX) *
+        .08;
+
+    cameraX =
+        Math.max(
+            0,
+            Math.min(
+                world.width - W,
+                cameraX
+            )
+        );
+
+}
+
+
+/* =========================================================
+   粒子更新
+   ========================================================= */
+
+function updateParticles(dt) {
+
+    for (const p of particles) {
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        p.vy += .2;
+
+        p.life -= dt;
+
+    }
+
+    particles =
+        particles.filter(
+            p => p.life > 0
+        );
+
+}
+
+
+/* =========================================================
+   碰撞
+   ========================================================= */
+
+function resolvePlayerEnemyCollision() {
+
+    for (const enemy of enemies) {
+
+        if (enemy.dead) {
+            continue;
+        }
+
+        const dx =
+            enemy.x -
+            player.x;
+
+        const dy =
+            enemy.y -
+            player.y;
+
+        if (
+            Math.abs(dx) < 45 &&
+            Math.abs(dy) < 45
+        ) {
+
+            player.x -=
+                Math.sign(dx) *
+                .8;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   游戏更新
+   ========================================================= */
+
+function update(dt) {
+
+    if (
+        !gameRunning ||
+        paused ||
+        gameEnded ||
+        gameCleared
+    ) {
+        return;
+    }
+
+    updatePlayer(dt);
+
+    updateEnemies(dt);
+
+    resolvePlayerEnemyCollision();
+
+    updateParticles(dt);
+
+    updateCamera();
+
+    if (comboTimer > 0) {
+
+        comboTimer -= dt;
+
+    } else {
+
+        combo = 0;
+
+    }
+
+    /* Boss 被击败 */
+
+    const boss =
+        enemies.find(
+            e => e.type === "boss"
+        );
+
+    if (
+        boss &&
+        boss.dead
+    ) {
+
+        gameClear();
+
+        return;
+
+    }
+
+    /* 防止玩家提前跑到 Boss */
+
+    if (
+        boss &&
+        !boss.dead &&
+        player.x >
+        boss.x - 500
+    ) {
+
+        player.x =
+            boss.x - 500;
+
+    }
+
+    updateHUD();
+
+}
+
+
+/* =========================================================
+   HUD
+   ========================================================= */
+
+function updateHUD() {
+
+    const hp =
+        Math.max(
+            0,
+            player.hp
+        );
+
+    healthElement.style.width =
+        hp + "%";
+
+    scoreElement.textContent =
+        String(score)
+            .padStart(6, "0");
+
+    if (combo >= 2) {
+
+        comboElement.textContent =
+            `${combo} HIT COMBO`;
+
+    } else {
+
+        comboElement.textContent = "";
+
+    }
+
+    const boss =
+        enemies.find(
+            e => e.type === "boss"
+        );
+
+    if (
+        boss &&
+        player.x >
+        boss.x - 700
+    ) {
+
+        stageElement.textContent =
+            "FINAL BATTLE · BOSS";
+
+    } else {
+
+        stageElement.textContent =
+            "STAGE 01 · CITY STREET";
+
+    }
+
+}
+
+
+/* =========================================================
+   游戏结束
+   ========================================================= */
+
+function gameOver() {
+
+    gameEnded = true;
+
+    finalScoreElement.textContent =
+        score;
+
+    gameoverScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   通关
+   ========================================================= */
+
+function gameClear() {
+
+    gameCleared = true;
+
+    score += 10000;
+
+    clearScoreElement.textContent =
+        score;
+
+    clearScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   绘制背景
+   ========================================================= */
+
+function drawBackground() {
+
+    /* 天空 */
+
+    const skyGradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            0,
+            H
+        );
+
+    skyGradient.addColorStop(
+        0,
+        "#101a38"
+    );
+
+    skyGradient.addColorStop(
+        .55,
+        "#3a4260"
+    );
+
+    skyGradient.addColorStop(
+        1,
+        "#151923"
+    );
+
+    ctx.fillStyle =
+        skyGradient;
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* 月亮 */
+
+    ctx.fillStyle =
+        "#f8e7ae";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        1040,
+        125,
+        55,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* 远景建筑 */
+
+    const buildingStart =
+        -(
+            cameraX *
+            .25
+        );
+
+    for (
+        let x = buildingStart - 100;
+        x < W + 200;
+        x += 180
+    ) {
+
+        const height =
+            130 +
+            ((Math.floor(x / 180) * 37) % 170);
+
+        ctx.fillStyle =
+            "#1c2334";
+
+        ctx.fillRect(
+            x,
+            world.groundY - height,
+            145,
+            height
+        );
+
+        /* 窗户 */
+
+        ctx.fillStyle =
+            "rgba(255,213,74,.18)";
+
+        for (
+            let wy = world.groundY - height + 20;
+            wy < world.groundY - 15;
+            wy += 30
+        ) {
+
+            for (
+                let wx = x + 18;
+                wx < x + 130;
+                wx += 35
+            ) {
+
+                ctx.fillRect(
+                    wx,
+                    wy,
+                    10,
+                    13
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* 街道 */
+
+    ctx.fillStyle =
+        "#222733";
+
+    ctx.fillRect(
+        0,
+        world.groundY,
+        W,
+        H - world.groundY
+    );
+
+
+    /* 道路 */
+
+    ctx.fillStyle =
+        "#303541";
+
+    ctx.fillRect(
+        0,
+        world.groundY + 45,
+        W,
+        4
+    );
+
+
+    /* 道路虚线 */
+
+    ctx.fillStyle =
+        "#656b78";
+
+    const roadOffset =
+        -(cameraX % 100);
+
+    for (
+        let x = roadOffset;
+        x < W;
+        x += 100
+    ) {
+
+        ctx.fillRect(
+            x,
+            world.groundY + 105,
+            55,
+            4
+        );
+
+    }
+
+
+    /* 地面装饰 */
+
+    drawStreetObjects();
+
+}
+
+
+/* =========================================================
+   街道装饰
+   ========================================================= */
+
+function drawStreetObjects() {
+
+    const start =
+        Math.floor(
+            cameraX / 220
+        ) * 220;
+
+    for (
+        let worldX = start - 220;
+        worldX < cameraX + W + 220;
+        worldX += 220
+    ) {
+
+        const x =
+            worldX -
+            cameraX;
+
+        /* 垃圾桶 */
+
+        if (
+            Math.floor(
+                worldX / 220
+            ) % 3 === 0
+        ) {
+
+            ctx.fillStyle =
+                "#39414b";
+
+            ctx.fillRect(
+                x + 25,
+                world.groundY - 45,
+                25,
+                45
+            );
+
+            ctx.fillStyle =
+                "#4d5661";
+
+            ctx.fillRect(
+                x + 20,
+                world.groundY - 50,
+                35,
+                7
+            );
+
+        }
+
+        /* 路灯 */
+
+        if (
+            Math.floor(
+                worldX / 220
+            ) % 4 === 0
+        ) {
+
+            ctx.fillStyle =
+                "#11151e";
+
+            ctx.fillRect(
+                x + 150,
+                world.groundY - 150,
+                8,
+                150
+            );
+
+            ctx.fillRect(
+                x + 150,
+                world.groundY - 150,
+                40,
+                7
+            );
+
+            ctx.fillStyle =
+                "#ffd54a";
+
+            ctx.beginPath();
+
+            ctx.arc(
+                x + 188,
+                world.groundY - 140,
+                9,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   绘制玩家
+   ========================================================= */
+
+function drawPlayer() {
+
+    const x =
+        player.x -
+        cameraX;
+
+    const y =
+        player.y;
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        y
+    );
+
+    if (player.facing < 0) {
+        ctx.scale(
+            -1,
+            1
+        );
+    }
+
+    /* 无敌闪烁 */
+
+    if (
+        player.invincibleTimer > 0 &&
+        Math.floor(
+            player.invincibleTimer / 5
+        ) % 2 === 0
+    ) {
+
+        ctx.globalAlpha = .45;
+
+    }
+
+    const walking =
+        Math.abs(player.vx) > .1 &&
+        player.onGround;
+
+    const legOffset =
+        walking
+            ? Math.sin(
+                player.walkTime * .35
+              ) * 7
+            : 0;
+
+
+    /* 阴影 */
+
+    ctx.globalAlpha *= .35;
+
+    ctx.fillStyle =
+        "#000";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        24,
+        98,
+        30,
+        7,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+
+
+    /* 腿 */
+
+    ctx.strokeStyle =
+        "#1b2435";
+
+    ctx.lineWidth = 12;
+
+    ctx.lineCap = "square";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        17,
+        70
+    );
+
+    ctx.lineTo(
+        13 - legOffset,
+        96
+    );
+
+    ctx.moveTo(
+        31,
+        70
+    );
+
+    ctx.lineTo(
+        35 + legOffset,
+        96
+    );
+
+    ctx.stroke();
+
+
+    /* 身体 */
+
+    ctx.fillStyle =
+        "#2d63d6";
+
+    ctx.fillRect(
+        8,
+        35,
+        32,
+        39
+    );
+
+
+    /* 肩膀 */
+
+    ctx.fillStyle =
+        "#4f7fe6";
+
+    ctx.fillRect(
+        3,
+        38,
+        9,
+        25
+    );
+
+
+    /* 头 */
+
+    ctx.fillStyle =
+        "#d99a73";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        24,
+        20,
+        18,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* 头发 */
+
+    ctx.fillStyle =
+        "#141922";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        24,
+        16,
+        18,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* 手 */
+
+    ctx.fillStyle =
+        "#d99a73";
+
+    if (
+        player.attackTimer > 0
+    ) {
+
+        if (
+            player.attackType === "punch"
+        ) {
+
+            ctx.fillRect(
+                35,
+                42,
+                38,
+                12
+            );
+
+            ctx.beginPath();
+
+            ctx.arc(
+                75,
+                48,
+                9,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fill();
+
+        } else {
+
+            ctx.fillRect(
+                31,
+                48,
+                30,
+                11
+            );
+
+        }
+
+    } else {
+
+        ctx.fillRect(
+            35,
+            43,
+            12,
+            25
+        );
+
+    }
+
+
+    /* 眼睛 */
+
+    ctx.fillStyle =
+        "#111";
+
+    ctx.fillRect(
+        32,
+        18,
+        3,
+        4
+    );
+
+    ctx.restore();
+
+
+    /* 攻击特效 */
+
+    if (
+        player.attackTimer > 0
+    ) {
+
+        ctx.save();
+
+        ctx.translate(
+            x,
+            y
+        );
+
+        ctx.strokeStyle =
+            "#ffd54a";
+
+        ctx.lineWidth = 5;
+
+        ctx.globalAlpha =
+            player.attackTimer / 16;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            48,
+            45,
+            player.attackType === "punch"
+                ? 42
+                : 55,
+            -0.8,
+            0.8
+        );
+
+        ctx.stroke();
+
+        ctx.restore();
+
+    }
+
+}
+
+
+/* =========================================================
+   绘制敌人
+   ========================================================= */
+
+function drawEnemy(enemy) {
+
+    if (enemy.dead) {
+        return;
+    }
+
+    const x =
+        enemy.x -
+        cameraX;
+
+    const y =
+        enemy.y;
+
+    ctx.save();
+
+    ctx.translate(
+        x,
+        y
+    );
+
+    if (enemy.facing < 0) {
+        ctx.scale(
+            -1,
+            1
+        );
+    }
+
+    if (
+        enemy.hitFlash > 0
+    ) {
+
+        ctx.globalAlpha =
+            .55;
+
+    }
+
+    /* 阴影 */
+
+    ctx.fillStyle =
+        "#000";
+
+    ctx.globalAlpha *= .35;
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        enemy.width / 2,
+        enemy.height,
+        enemy.width * .45,
+        7,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+
+
+    const isBoss =
+        enemy.type === "boss";
+
+
+    /* 腿 */
+
+    ctx.strokeStyle =
+        isBoss
+            ? "#391d49"
+            : "#151923";
+
+    ctx.lineWidth =
+        isBoss
+            ? 15
+            : 11;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        enemy.width * .35,
+        enemy.height * .65
+    );
+
+    ctx.lineTo(
+        enemy.width * .25,
+        enemy.height
+    );
+
+    ctx.moveTo(
+        enemy.width * .65,
+        enemy.height * .65
+    );
+
+    ctx.lineTo(
+        enemy.width * .75,
+        enemy.height
+    );
+
+    ctx.stroke();
+
+
+    /* 身体 */
+
+    ctx.fillStyle =
+        isBoss
+            ? "#6b2b83"
+            : "#c0394d";
+
+    ctx.fillRect(
+        enemy.width * .15,
+        enemy.height * .35,
+        enemy.width * .7,
+        enemy.height * .35
+    );
+
+
+    /* 头 */
+
+    ctx.fillStyle =
+        isBoss
+            ? "#d18a6b"
+            : "#b8755c";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        enemy.width / 2,
+        enemy.height * .2,
+        isBoss ? 25 : 18,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* 头发 */
+
+    ctx.fillStyle =
+        "#111";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        enemy.width / 2,
+        enemy.height * .16,
+        isBoss ? 25 : 18,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* 手 */
+
+    ctx.fillStyle =
+        isBoss
+            ? "#d18a6b"
+            : "#b8755c";
+
+    ctx.fillRect(
+        enemy.width * .7,
+        enemy.height * .39,
+        isBoss ? 28 : 18,
+        12
+    );
+
+
+    ctx.restore();
+
+
+    /* 血条 */
+
+    const barWidth =
+        isBoss
+            ? 110
+            : 65;
+
+    const barHeight = 7;
+
+    const hpPercent =
+        Math.max(
+            0,
+            enemy.hp /
+            enemy.maxHp
+        );
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.7)";
+
+    ctx.fillRect(
+        x - barWidth / 2,
+        y - 18,
+        barWidth,
+        barHeight
+    );
+
+    ctx.fillStyle =
+        isBoss
+            ? "#d946ef"
+            : "#ef4444";
+
+    ctx.fillRect(
+        x - barWidth / 2,
+        y - 18,
+        barWidth * hpPercent,
+        barHeight
+    );
+
+    if (isBoss) {
+
+        ctx.fillStyle =
+            "#fff";
+
+        ctx.font =
+            "bold 14px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.fillText(
+            "BOSS",
+            x,
+            y - 28
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   绘制粒子
+   ========================================================= */
+
+function drawParticles() {
+
+    for (const p of particles) {
+
+        ctx.globalAlpha =
+            Math.max(
+                0,
+                p.life / p.maxLife
+            );
+
+        ctx.fillStyle =
+            p.color;
+
+        ctx.fillRect(
+            p.x - cameraX,
+            p.y,
+            p.size,
+            p.size
+        );
+
+    }
+
+    ctx.globalAlpha = 1;
+
+}
+
+
+/* =========================================================
+   绘制关卡终点
+   ========================================================= */
+
+function drawBossGate() {
+
+    const boss =
+        enemies.find(
+            e => e.type === "boss"
+        );
+
+    if (!boss || boss.dead) {
+        return;
+    }
+
+    const x =
+        boss.x -
+        650 -
+        cameraX;
+
+    if (
+        x < -100 ||
+        x > W + 100
+    ) {
+        return;
+    }
+
+    ctx.fillStyle =
+        "rgba(220,50,80,.15)";
+
+    ctx.fillRect(
+        x,
+        0,
+        4,
+        world.groundY
+    );
+
+    ctx.fillStyle =
+        "#ff526c";
+
+    ctx.font =
+        "bold 14px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.fillText(
+        "BOSS AREA",
+        x,
+        160
+    );
+
+}
+
+
+/* =========================================================
+   总绘制
+   ========================================================= */
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawBackground();
+
+    drawBossGate();
+
+    /* 敌人 */
+
+    const visibleEnemies =
+        enemies
+            .filter(
+                e =>
+                    !e.dead &&
+                    e.x >
+                        cameraX - 100 &&
+                    e.x <
+                        cameraX + W + 100
+            )
+            .sort(
+                (a,b) =>
+                    a.y - b.y
+            );
+
+    for (
+        const enemy
+        of visibleEnemies
+    ) {
+
+        drawEnemy(enemy);
+
+    }
+
+    drawPlayer();
+
+    drawParticles();
+
+}
+
+
+/* =========================================================
+   游戏循环
+   ========================================================= */
+
+function gameLoop(time) {
+
+    const delta =
+        Math.min(
+            32,
+            time - lastTime || 16
+        );
+
+    lastTime = time;
+
+    const dt =
+        delta / 16.6667;
+
+    update(dt);
+
+    draw();
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+}
+
+
+/* =========================================================
+   按钮
+   ========================================================= */
+
+startBtn.addEventListener(
+    "click",
+    startGame
+);
+
+restartBtn.addEventListener(
+    "click",
+    startGame
+);
+
+clearRestartBtn.addEventListener(
+    "click",
+    startGame
+);
+
+resumeBtn.addEventListener(
+    "click",
+    togglePause
+);
+
+
+/* =========================================================
+   手机按键
+   ========================================================= */
+
+document
+    .querySelectorAll(
+        ".mobile-btn"
+    )
+    .forEach(button => {
+
+        const key =
+            button.dataset.key;
+
+        button.addEventListener(
+            "pointerdown",
+            event => {
+
+                event.preventDefault();
+
+                keys[key] = true;
+
+            }
+        );
+
+        button.addEventListener(
+            "pointerup",
+            event => {
+
+                event.preventDefault();
+
+                keys[key] = false;
+
+            }
+        );
+
+        button.addEventListener(
+            "pointerleave",
+            () => {
+
+                keys[key] = false;
+
+            }
+        );
+
+        button.addEventListener(
+            "pointercancel",
+            () => {
+
+                keys[key] = false;
+
+            }
+        );
+
+    });
+
+
+/* =========================================================
+   防止窗口失焦后按键卡住
+   ========================================================= */
+
+window.addEventListener(
+    "blur",
+    () => {
+
+        for (
+            const key in keys
+        ) {
+
+            keys[key] = false;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   启动渲染
+   ========================================================= */
+
+player = createPlayer();
+
+createLevel();
+
+updateHUD();
+
+requestAnimationFrame(
+    gameLoop
+);
+
+</script>
+
+</body>
+</html>
+```
