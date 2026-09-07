@@ -77,6 +77,14 @@
         "icon": "🌊",
         "path": "/games/deep-eat/index.html"
     }
-
+{
+  "id": "hanoi",
+  "title": "汉诺塔",
+  "description": "经典汉诺塔圆盘挑战，挑战最少步数完成通关",
+  "path": "/games/hanoi/index.html",
+  "category": "益智",
+  "date": "2026-09-07",
+  "icon": "🗼"
+}
 
 ]
