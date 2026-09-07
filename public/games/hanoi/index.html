@@ -5,399 +5,707 @@
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>汉诺塔 · 圆盘挑战</title>
+<title>汉诺塔 · 拖拽挑战</title>
 
 <style>
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    width: 100%;
+    min-height: 100%;
 }
 
 body {
     min-height: 100vh;
+
     font-family:
         "Microsoft YaHei",
         "PingFang SC",
         Arial,
         sans-serif;
 
-    background:
-        radial-gradient(circle at 20% 20%, #263b72 0%, transparent 35%),
-        radial-gradient(circle at 80% 80%, #321f65 0%, transparent 35%),
-        linear-gradient(135deg, #080b18, #10162d 50%, #090b18);
-
     color: white;
+
+    background:
+        radial-gradient(circle at 20% 15%, #263b72 0%, transparent 35%),
+        radial-gradient(circle at 85% 85%, #342066 0%, transparent 35%),
+        linear-gradient(135deg, #070a17, #10162d 50%, #080a16);
+
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+
+    padding: 18px;
+
+    overflow-x: hidden;
 }
 
-/* 主容器 */
 .game {
     width: min(1100px, 100%);
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 24px;
+
     padding: 24px;
 
-    backdrop-filter: blur(18px);
+    border-radius: 26px;
+
+    background: rgba(255,255,255,.065);
+
+    border: 1px solid rgba(255,255,255,.11);
+
     box-shadow:
-        0 25px 80px rgba(0,0,0,.45),
+        0 30px 90px rgba(0,0,0,.5),
         inset 0 1px rgba(255,255,255,.08);
+
+    backdrop-filter: blur(18px);
 }
 
-/* 标题 */
+/* =========================
+   标题
+========================= */
+
 .header {
     text-align: center;
     margin-bottom: 20px;
 }
 
 .header h1 {
-    font-size: clamp(30px, 5vw, 48px);
-    letter-spacing: 4px;
+    font-size: clamp(32px, 5vw, 50px);
 
-    background: linear-gradient(
-        90deg,
-        #66e8ff,
-        #9c7cff,
-        #ff70c7
-    );
+    letter-spacing: 5px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #63e7ff,
+            #9b7bff,
+            #ff72c8
+        );
 
     -webkit-background-clip: text;
+    background-clip: text;
+
     color: transparent;
 }
 
 .header p {
-    margin-top: 8px;
-    color: #9da8c7;
-    font-size: 14px;
+    margin-top: 7px;
+
+    color: #8995b8;
+
+    font-size: 13px;
+
+    letter-spacing: 2px;
 }
 
-/* 控制区 */
+/* =========================
+   控制
+========================= */
+
 .controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
+
+    gap: 10px;
+
     flex-wrap: wrap;
-    margin-bottom: 20px;
+
+    margin-bottom: 18px;
 }
 
 .control-item {
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.1);
-    padding: 9px 14px;
-    border-radius: 12px;
-    color: #c9d2ee;
-}
+    padding: 9px 13px;
 
-select,
-button {
-    font-family: inherit;
+    border-radius: 12px;
+
+    background: rgba(255,255,255,.055);
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    color: #c5cde5;
+
+    font-size: 14px;
 }
 
 select {
-    background: #161d38;
-    color: white;
-    border: 1px solid #394566;
+    margin-left: 5px;
+
+    padding: 5px 9px;
+
     border-radius: 8px;
-    padding: 6px 10px;
+
+    background: #161d38;
+
+    color: white;
+
+    border: 1px solid #3b4769;
+
     outline: none;
 }
 
 button {
     border: none;
-    border-radius: 10px;
+
     padding: 10px 16px;
-    cursor: pointer;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #506aff,
+            #8058ff
+        );
+
     color: white;
+
     font-weight: bold;
 
-    background: linear-gradient(
-        135deg,
-        #5068ff,
-        #8058ff
-    );
+    cursor: pointer;
 
-    box-shadow: 0 5px 18px rgba(90,90,255,.25);
     transition: .2s;
+
+    box-shadow:
+        0 6px 18px rgba(80,100,255,.22);
 }
 
 button:hover {
     transform: translateY(-2px);
-    filter: brightness(1.15);
+    filter: brightness(1.12);
 }
 
 button:active {
     transform: scale(.96);
 }
 
-/* 数据 */
+/* =========================
+   数据
+========================= */
+
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 22px;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 18px;
 }
 
 .stat {
     text-align: center;
-    padding: 13px;
 
-    background: rgba(0,0,0,.2);
+    padding: 12px;
+
     border-radius: 14px;
 
-    border: 1px solid rgba(255,255,255,.07);
+    background: rgba(0,0,0,.19);
+
+    border: 1px solid rgba(255,255,255,.055);
 }
 
 .stat-label {
-    font-size: 12px;
-    color: #8994b5;
+    font-size: 11px;
+
+    color: #7884a6;
 }
 
 .stat-value {
-    margin-top: 5px;
+    margin-top: 4px;
+
     font-size: 21px;
+
     font-weight: bold;
 }
 
-/* 游戏区域 */
+/* =========================
+   游戏棋盘
+========================= */
+
 .board {
     position: relative;
 
-    min-height: 430px;
-
-    border-radius: 20px;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,.04),
-            rgba(255,255,255,.01)
-        );
-
-    border: 1px solid rgba(255,255,255,.08);
+    height: 470px;
 
     overflow: hidden;
 
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-end;
+    border-radius: 22px;
 
-    padding: 35px 3% 65px;
+    background:
+        radial-gradient(
+            circle at 50% 20%,
+            rgba(120,150,255,.07),
+            transparent 55%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.035),
+            rgba(255,255,255,.008)
+        );
+
+    border: 1px solid rgba(255,255,255,.075);
+
+    user-select: none;
+
+    touch-action: none;
 }
 
 /* 地面 */
-.board::after {
-    content: "";
 
+.floor {
     position: absolute;
+
     left: 5%;
     right: 5%;
-    bottom: 48px;
 
-    height: 7px;
+    bottom: 47px;
 
-    border-radius: 10px;
-
-    background: linear-gradient(
-        90deg,
-        #41537e,
-        #778ac0,
-        #41537e
-    );
-
-    box-shadow:
-        0 0 20px rgba(100,130,255,.4);
-}
-
-/* 柱子 */
-.rod-area {
-    position: relative;
-
-    width: 30%;
-
-    height: 350px;
-
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-
-    flex-direction: column;
-
-    z-index: 2;
-
-    cursor: pointer;
-}
-
-.rod {
-    position: absolute;
-
-    bottom: 48px;
-
-    width: 10px;
-    height: 280px;
+    height: 9px;
 
     border-radius: 10px;
 
     background:
         linear-gradient(
             90deg,
-            #7183ba,
-            #d3ddff,
-            #7183ba
+            #394a72,
+            #8b9bc9,
+            #394a72
         );
 
     box-shadow:
-        0 0 15px rgba(140,170,255,.25);
+        0 0 18px rgba(120,150,255,.28);
+
+    z-index: 1;
 }
 
-.rod-label {
-    position: absolute;
-    bottom: 5px;
+/* =========================
+   柱子区域
+========================= */
 
-    font-size: 16px;
-    font-weight: bold;
-
-    color: #aeb9d9;
-}
-
-.rod-hint {
-    position: absolute;
-    top: 8px;
-
-    font-size: 12px;
-    color: #667294;
-
-    transition: .2s;
-}
-
-.rod-area.selected .rod-hint {
-    color: #72dcff;
-}
-
-/* 圆盘 */
-.disks {
+.rod-area {
     position: absolute;
 
-    bottom: 48px;
+    top: 0;
 
-    width: 100%;
-    height: 280px;
+    bottom: 0;
 
-    display: flex;
-    flex-direction: column-reverse;
+    width: 33.333%;
 
-    align-items: center;
+    cursor: default;
+
+    z-index: 2;
+}
+
+.rod-area:nth-child(1) {
+    left: 0;
+}
+
+.rod-area:nth-child(2) {
+    left: 33.333%;
+}
+
+.rod-area:nth-child(3) {
+    left: 66.666%;
+}
+
+/* 柱子 */
+
+.rod {
+    position: absolute;
+
+    width: 11px;
+
+    height: 290px;
+
+    left: 50%;
+
+    bottom: 52px;
+
+    transform: translateX(-50%);
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #6578ac,
+            #d8e0ff,
+            #6578ac
+        );
+
+    box-shadow:
+        0 0 16px rgba(130,160,255,.22);
+
+    transition:
+        box-shadow .2s,
+        filter .2s;
+}
+
+/* 柱子顶部 */
+
+.rod::before {
+    content: "";
+
+    position: absolute;
+
+    width: 30px;
+    height: 9px;
+
+    left: 50%;
+    top: -3px;
+
+    transform: translateX(-50%);
+
+    border-radius: 8px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7184b8,
+            #e0e7ff,
+            #7184b8
+        );
+}
+
+/* 目标柱高亮 */
+
+.rod-area.drop-target .rod {
+    box-shadow:
+        0 0 28px rgba(80,220,255,.9);
+
+    filter: brightness(1.3);
+}
+
+.rod-area.drop-target::after {
+    content: "";
+
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 63px;
+
+    width: 220px;
+
+    height: 65px;
+
+    transform: translateX(-50%);
+
+    border-radius: 50%;
+
+    border: 2px dashed rgba(85,220,255,.7);
+
+    background: rgba(70,200,255,.06);
 
     pointer-events: none;
 }
 
+/* 柱子名称 */
+
+.rod-label {
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 9px;
+
+    transform: translateX(-50%);
+
+    color: #aeb9d8;
+
+    font-size: 16px;
+
+    font-weight: bold;
+}
+
+.rod-hint {
+    position: absolute;
+
+    left: 50%;
+
+    top: 14px;
+
+    transform: translateX(-50%);
+
+    color: #596682;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+}
+
+/* =========================
+   圆盘容器
+========================= */
+
+.disks {
+    position: absolute;
+
+    left: 50%;
+
+    bottom: 61px;
+
+    width: 220px;
+
+    height: 280px;
+
+    transform: translateX(-50%);
+
+    display: flex;
+
+    flex-direction: column-reverse;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+/* =========================
+   圆盘
+========================= */
+
 .disk {
     position: relative;
 
-    height: 32px;
+    flex-shrink: 0;
+
+    height: 34px;
 
     margin-top: 2px;
 
-    border-radius: 8px;
+    border-radius: 9px;
 
     display: flex;
-    justify-content: center;
+
     align-items: center;
 
-    color: rgba(255,255,255,.9);
+    justify-content: center;
 
     font-size: 12px;
+
     font-weight: bold;
 
+    color: rgba(255,255,255,.92);
+
     box-shadow:
-        0 4px 8px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.25);
+        0 5px 10px rgba(0,0,0,.35),
+        inset 0 1px rgba(255,255,255,.28),
+        inset 0 -1px rgba(0,0,0,.12);
 
     transition:
-        transform .25s,
-        width .25s,
-        opacity .2s;
+        transform .2s ease,
+        filter .2s ease,
+        box-shadow .2s ease;
+
+    pointer-events: auto;
+
+    cursor: grab;
+
+    touch-action: none;
+
+    will-change: transform, left, top;
 }
 
-/* 不同圆盘颜色 */
-.disk:nth-child(1) {
-    background: linear-gradient(90deg,#ff4d7d,#ff7a96);
+/* 圆盘中间高光 */
+
+.disk::before {
+    content: "";
+
+    position: absolute;
+
+    left: 8%;
+
+    right: 8%;
+
+    top: 4px;
+
+    height: 6px;
+
+    border-radius: 10px;
+
+    background: rgba(255,255,255,.14);
+
+    pointer-events: none;
 }
 
-.disk:nth-child(2) {
-    background: linear-gradient(90deg,#ff8a3d,#ffb15c);
+/* 圆盘颜色 */
+
+.disk[data-size="1"] {
+    background:
+        linear-gradient(
+            90deg,
+            #ff4779,
+            #ff7897
+        );
 }
 
-.disk:nth-child(3) {
-    background: linear-gradient(90deg,#ffd23f,#ffe77d);
-    color: #4b3b00;
+.disk[data-size="2"] {
+    background:
+        linear-gradient(
+            90deg,
+            #ff8438,
+            #ffb35d
+        );
 }
 
-.disk:nth-child(4) {
-    background: linear-gradient(90deg,#42df9b,#7af0ba);
+.disk[data-size="3"] {
+    background:
+        linear-gradient(
+            90deg,
+            #ffd039,
+            #ffe878
+        );
+
+    color: #503d00;
 }
 
-.disk:nth-child(5) {
-    background: linear-gradient(90deg,#35b9ff,#79d8ff);
+.disk[data-size="4"] {
+    background:
+        linear-gradient(
+            90deg,
+            #39d995,
+            #7af0ba
+        );
 }
 
-.disk:nth-child(6) {
-    background: linear-gradient(90deg,#687cff,#9a8cff);
+.disk[data-size="5"] {
+    background:
+        linear-gradient(
+            90deg,
+            #31b9ff,
+            #7ad9ff
+        );
 }
 
-.disk:nth-child(7) {
-    background: linear-gradient(90deg,#a95dff,#cf94ff);
+.disk[data-size="6"] {
+    background:
+        linear-gradient(
+            90deg,
+            #687cff,
+            #9a8cff
+        );
 }
 
-.disk:nth-child(8) {
-    background: linear-gradient(90deg,#ec54ff,#ff8bd9);
+.disk[data-size="7"] {
+    background:
+        linear-gradient(
+            90deg,
+            #a85cff,
+            #d092ff
+        );
 }
 
-/* 选中状态 */
-.rod-area.selected {
-    filter: brightness(1.2);
+.disk[data-size="8"] {
+    background:
+        linear-gradient(
+            90deg,
+            #ed54ff,
+            #ff8bd7
+        );
 }
 
-.rod-area.selected .rod {
+/* 最上面的圆盘 */
+
+.disk.top-disk {
+    cursor: grab;
+
     box-shadow:
-        0 0 25px rgba(80,210,255,.8);
+        0 6px 15px rgba(0,0,0,.45),
+        0 0 0 1px rgba(255,255,255,.08);
 }
 
-/* 提示 */
+.disk.top-disk:hover {
+    filter: brightness(1.08);
+
+    transform:
+        translateY(-3px);
+}
+
+/* 被抓住 */
+
+.disk.dragging {
+    cursor: grabbing;
+
+    filter: brightness(1.13);
+
+    box-shadow:
+        0 18px 30px rgba(0,0,0,.45),
+        0 0 30px rgba(100,210,255,.32);
+
+    z-index: 9999;
+}
+
+/* =========================
+   拖拽中的浮动圆盘
+========================= */
+
+.drag-layer {
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: 1000;
+}
+
+/* =========================
+   提示
+========================= */
+
 .message {
     min-height: 25px;
 
+    margin-top: 14px;
+
     text-align: center;
 
-    margin-top: 16px;
-
-    color: #91a2ce;
+    color: #93a0c4;
 
     font-size: 14px;
+
+    transition: color .2s;
 }
 
-/* 胜利弹窗 */
+.message.good {
+    color: #65e3ff;
+}
+
+.message.bad {
+    color: #ff7998;
+}
+
+/* =========================
+   胜利弹窗
+========================= */
+
 .win-overlay {
     position: fixed;
 
     inset: 0;
 
-    background: rgba(3,5,15,.75);
-
-    backdrop-filter: blur(8px);
+    z-index: 5000;
 
     display: none;
 
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
     padding: 20px;
 
-    z-index: 100;
+    background: rgba(3,5,15,.78);
+
+    backdrop-filter: blur(10px);
 }
 
 .win-overlay.show {
@@ -405,13 +713,13 @@ button:active {
 }
 
 .win {
-    width: min(420px,100%);
+    width: min(430px, 100%);
 
     padding: 35px;
 
     text-align: center;
 
-    border-radius: 24px;
+    border-radius: 25px;
 
     background:
         linear-gradient(
@@ -422,35 +730,42 @@ button:active {
 
     border: 1px solid rgba(255,255,255,.12);
 
-    box-shadow: 0 30px 100px rgba(0,0,0,.6);
+    box-shadow:
+        0 35px 100px rgba(0,0,0,.65);
 
-    animation: pop .35s ease;
+    animation: winPop .35s ease;
 }
 
-@keyframes pop {
+@keyframes winPop {
+
     from {
-        transform: scale(.8);
         opacity: 0;
+        transform: scale(.78) translateY(20px);
     }
 
     to {
-        transform: scale(1);
         opacity: 1;
+        transform: scale(1) translateY(0);
     }
+
 }
 
 .win-icon {
-    font-size: 65px;
+    font-size: 64px;
 }
 
 .win h2 {
+    margin-top: 8px;
+
     font-size: 30px;
-    margin: 10px 0;
 }
 
 .win p {
-    color: #aab5d3;
-    line-height: 1.8;
+    margin-top: 8px;
+
+    color: #aab5d4;
+
+    line-height: 1.7;
 }
 
 .win-score {
@@ -458,63 +773,130 @@ button:active {
 
     padding: 15px;
 
+    border-radius: 15px;
+
     background: rgba(255,255,255,.05);
 
-    border-radius: 14px;
+    color: #c6d0e8;
 
-    font-size: 18px;
+    line-height: 1.9;
 }
 
-/* 底部 */
+/* =========================
+   底部
+========================= */
+
 .footer {
+    margin-top: 15px;
+
     text-align: center;
-    color: #596582;
+
+    color: #56627f;
+
     font-size: 12px;
-    margin-top: 18px;
 }
 
-/* 手机 */
+/* =========================
+   手机
+========================= */
+
 @media (max-width: 650px) {
 
     body {
-        padding: 8px;
+        padding: 7px;
     }
 
     .game {
-        padding: 14px;
-        border-radius: 18px;
+        padding: 13px;
+
+        border-radius: 19px;
     }
 
-    .stats {
-        grid-template-columns: repeat(2,1fr);
-    }
-
-    .board {
-        min-height: 390px;
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .rod-area {
-        width: 33%;
-    }
-
-    .rod {
-        height: 260px;
-    }
-
-    .disks {
-        height: 260px;
-    }
-
-    .disk {
-        height: 29px;
+    .header {
+        margin-bottom: 13px;
     }
 
     .header h1 {
-        font-size: 30px;
+        font-size: 31px;
+    }
+
+    .stats {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .board {
+        height: 430px;
+    }
+
+    .rod {
+        height: 270px;
+    }
+
+    .disks {
+        bottom: 61px;
+
+        width: 200px;
+    }
+
+    .disk {
+        height: 30px;
+    }
+
+    .rod-area.drop-target::after {
+        width: 150px;
+    }
+
+    .footer {
+        display: none;
     }
 }
+
+/* 小屏横向 */
+
+@media (max-height: 520px) and (orientation: landscape) {
+
+    body {
+        padding: 5px;
+    }
+
+    .game {
+        padding: 10px;
+    }
+
+    .header {
+        margin-bottom: 7px;
+    }
+
+    .header h1 {
+        font-size: 25px;
+    }
+
+    .header p {
+        display: none;
+    }
+
+    .controls {
+        margin-bottom: 7px;
+    }
+
+    .stats {
+        margin-bottom: 7px;
+    }
+
+    .board {
+        height: 330px;
+    }
+
+    .rod {
+        height: 220px;
+    }
+
+    .disks {
+        height: 220px;
+    }
+}
+
 </style>
 </head>
 
@@ -524,13 +906,14 @@ button:active {
 
     <div class="header">
         <h1>汉诺塔</h1>
-        <p>HANOI TOWER · 圆盘挑战</p>
+        <p>HANOI TOWER · DRAG & DROP</p>
     </div>
 
     <div class="controls">
 
         <div class="control-item">
             圆盘：
+
             <select id="diskCount">
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -541,107 +924,212 @@ button:active {
             </select>
         </div>
 
-        <button onclick="restartGame()">🔄 重新开始</button>
+        <button id="restartBtn">
+            🔄 重新开始
+        </button>
 
-        <button onclick="undoMove()">↩️ 撤销</button>
+        <button id="undoBtn">
+            ↩️ 撤销
+        </button>
 
     </div>
+
 
     <div class="stats">
 
         <div class="stat">
-            <div class="stat-label">当前步数</div>
-            <div class="stat-value" id="moves">0</div>
+            <div class="stat-label">
+                当前步数
+            </div>
+
+            <div class="stat-value"
+                 id="moves">
+                0
+            </div>
         </div>
 
-        <div class="stat">
-            <div class="stat-label">最少步数</div>
-            <div class="stat-value" id="minimum">31</div>
-        </div>
 
         <div class="stat">
-            <div class="stat-label">用时</div>
-            <div class="stat-value" id="time">00:00</div>
+            <div class="stat-label">
+                最少步数
+            </div>
+
+            <div class="stat-value"
+                 id="minimum">
+                31
+            </div>
         </div>
 
+
         <div class="stat">
-            <div class="stat-label">圆盘数量</div>
-            <div class="stat-value" id="count">5</div>
+            <div class="stat-label">
+                用时
+            </div>
+
+            <div class="stat-value"
+                 id="time">
+                00:00
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-label">
+                圆盘数量
+            </div>
+
+            <div class="stat-value"
+                 id="count">
+                5
+            </div>
         </div>
 
     </div>
 
-    <div class="board">
 
-        <div class="rod-area" id="rod0" onclick="clickRod(0)">
+    <!-- 游戏区域 -->
+
+    <div class="board"
+         id="board">
+
+        <div class="floor"></div>
+
+
+        <!-- A -->
+
+        <div class="rod-area"
+             data-rod="0">
+
             <div class="rod"></div>
-            <div class="disks" id="disks0"></div>
-            <div class="rod-hint">点击选择</div>
-            <div class="rod-label">A</div>
+
+            <div class="disks"
+                 id="disks0"></div>
+
+            <div class="rod-hint">
+                拖动圆盘
+            </div>
+
+            <div class="rod-label">
+                A
+            </div>
+
         </div>
 
-        <div class="rod-area" id="rod1" onclick="clickRod(1)">
+
+        <!-- B -->
+
+        <div class="rod-area"
+             data-rod="1">
+
             <div class="rod"></div>
-            <div class="disks" id="disks1"></div>
-            <div class="rod-hint">点击选择</div>
-            <div class="rod-label">B</div>
+
+            <div class="disks"
+                 id="disks1"></div>
+
+            <div class="rod-hint">
+                放到这里
+            </div>
+
+            <div class="rod-label">
+                B
+            </div>
+
         </div>
 
-        <div class="rod-area" id="rod2" onclick="clickRod(2)">
+
+        <!-- C -->
+
+        <div class="rod-area"
+             data-rod="2">
+
             <div class="rod"></div>
-            <div class="disks" id="disks2"></div>
-            <div class="rod-hint">点击选择</div>
-            <div class="rod-label">C</div>
+
+            <div class="disks"
+                 id="disks2"></div>
+
+            <div class="rod-hint">
+                放到这里
+            </div>
+
+            <div class="rod-label">
+                C
+            </div>
+
+        </div>
+
+
+        <!-- 拖拽层 -->
+
+        <div class="drag-layer"
+             id="dragLayer">
         </div>
 
     </div>
 
-    <div class="message" id="message">
-        点击一个圆盘所在的柱子，然后点击目标柱子
+
+    <div class="message"
+         id="message">
+
+        👆 按住最上面的圆盘，把它拖到另一根柱子
+
     </div>
+
 
     <div class="footer">
-        规则：大圆盘不能放在小圆盘上面
+
+        大圆盘不能放在小圆盘上面 · 拖拽操作
+
     </div>
 
 </div>
 
 
-<!-- 胜利弹窗 -->
+<!-- 胜利 -->
 
-<div class="win-overlay" id="winOverlay">
+<div class="win-overlay"
+     id="winOverlay">
 
     <div class="win">
 
-        <div class="win-icon">🏆</div>
+        <div class="win-icon">
+            🏆
+        </div>
 
-        <h2>挑战成功！</h2>
+        <h2>
+            挑战成功！
+        </h2>
 
         <p>
-            你成功完成了汉诺塔挑战
+            所有圆盘已经移动到 C 柱
         </p>
 
         <div class="win-score">
 
             <div>
                 步数：
-                <strong id="winMoves">0</strong>
+                <strong id="winMoves">
+                    0
+                </strong>
             </div>
 
             <div>
                 最少：
-                <strong id="winMinimum">0</strong>
+                <strong id="winMinimum">
+                    0
+                </strong>
             </div>
 
             <div>
                 用时：
-                <strong id="winTime">00:00</strong>
+                <strong id="winTime">
+                    00:00
+                </strong>
             </div>
 
         </div>
 
-        <button onclick="restartGame()">
-            🔄 再来一次
+        <button id="winRestartBtn">
+            🔄 再玩一次
         </button>
 
     </div>
@@ -652,9 +1140,9 @@ button:active {
 <script>
 
 /*
-=========================================================
-汉诺塔核心数据
-=========================================================
+===========================================================
+汉诺塔 · 拖拽版
+===========================================================
 */
 
 let diskCount = 5;
@@ -667,8 +1155,6 @@ let towers = [
 
 let moves = 0;
 
-let selectedRod = null;
-
 let history = [];
 
 let startTime = null;
@@ -679,16 +1165,61 @@ let gameFinished = false;
 
 
 /*
-=========================================================
+===========================================================
+拖拽状态
+===========================================================
+*/
+
+let dragging = false;
+
+let dragDisk = null;
+
+let dragFrom = -1;
+
+let dragPointerId = null;
+
+let dragOffsetX = 0;
+
+let dragOffsetY = 0;
+
+let dragOriginalParent = null;
+
+let dragOriginalNextSibling = null;
+
+let dragOriginalTransform = "";
+
+let currentTarget = -1;
+
+
+/*
+===========================================================
+DOM
+===========================================================
+*/
+
+const board =
+    document.getElementById("board");
+
+const message =
+    document.getElementById("message");
+
+const winOverlay =
+    document.getElementById("winOverlay");
+
+
+/*
+===========================================================
 初始化
-=========================================================
+===========================================================
 */
 
 function initGame() {
 
     diskCount =
         parseInt(
-            document.getElementById("diskCount").value
+            document.getElementById(
+                "diskCount"
+            ).value
         );
 
     towers = [
@@ -698,18 +1229,23 @@ function initGame() {
     ];
 
     /*
-     * 最大圆盘放最下面
-     * 最小圆盘放最上面
+     * 最大圆盘在最下面
+     *
+     * 数组最后一个
+     * 是最上面的圆盘
      */
-    for (let i = diskCount; i >= 1; i--) {
+
+    for (
+        let i = diskCount;
+        i >= 1;
+        i--
+    ) {
 
         towers[0].push(i);
 
     }
 
     moves = 0;
-
-    selectedRod = null;
 
     history = [];
 
@@ -719,21 +1255,32 @@ function initGame() {
 
     clearInterval(timer);
 
-    document.getElementById("moves").textContent = "0";
+    dragging = false;
 
-    document.getElementById("count").textContent = diskCount;
+    dragDisk = null;
 
-    document.getElementById("minimum").textContent =
+    dragFrom = -1;
+
+    currentTarget = -1;
+
+    document.getElementById("moves")
+        .textContent = "0";
+
+    document.getElementById("count")
+        .textContent = diskCount;
+
+    document.getElementById("minimum")
+        .textContent =
         Math.pow(2, diskCount) - 1;
 
-    document.getElementById("time").textContent =
-        "00:00";
+    document.getElementById("time")
+        .textContent = "00:00";
 
-    document.getElementById("winOverlay")
-        .classList.remove("show");
+    winOverlay.classList.remove("show");
 
-    document.getElementById("message").textContent =
-        "点击一个圆盘所在的柱子，然后点击目标柱子";
+    showMessage(
+        "👆 按住最上面的圆盘，把它拖到另一根柱子"
+    );
 
     render();
 
@@ -741,9 +1288,33 @@ function initGame() {
 
 
 /*
-=========================================================
-绘制
-=========================================================
+===========================================================
+计算圆盘宽度
+===========================================================
+*/
+
+function getDiskWidth(size) {
+
+    const min = 55;
+
+    const max = 195;
+
+    if (diskCount === 1) {
+        return max;
+    }
+
+    return min +
+        (size - 1) /
+        (diskCount - 1) *
+        (max - min);
+
+}
+
+
+/*
+===========================================================
+绘制圆盘
+===========================================================
 */
 
 function render() {
@@ -751,41 +1322,62 @@ function render() {
     for (let i = 0; i < 3; i++) {
 
         const container =
-            document.getElementById("disks" + i);
+            document.getElementById(
+                "disks" + i
+            );
 
         container.innerHTML = "";
 
-        /*
-         * towers 中：
-         * 数组末尾 = 最上面的圆盘
-         */
-        towers[i].forEach(disk => {
 
-            const el =
-                document.createElement("div");
+        towers[i].forEach(
+            (size, index) => {
 
-            el.className = "disk";
+                const disk =
+                    document.createElement(
+                        "div"
+                    );
 
-            /*
-             * 根据圆盘大小计算宽度
-             */
-            const minWidth = 50;
+                disk.className = "disk";
 
-            const maxWidth = 190;
+                disk.dataset.size =
+                    size;
 
-            const width =
-                minWidth +
-                (disk - 1) /
-                Math.max(1, diskCount - 1) *
-                (maxWidth - minWidth);
+                disk.dataset.rod =
+                    i;
 
-            el.style.width = width + "px";
+                disk.textContent =
+                    size;
 
-            el.textContent = disk;
+                disk.style.width =
+                    getDiskWidth(size)
+                    + "px";
 
-            container.appendChild(el);
 
-        });
+                /*
+                 * 最上面的圆盘
+                 * 才能拖
+                 */
+
+                if (
+                    index ===
+                    towers[i].length - 1
+                ) {
+
+                    disk.classList.add(
+                        "top-disk"
+                    );
+
+                    addDragEvents(disk);
+
+                }
+
+
+                container.appendChild(
+                    disk
+                );
+
+            }
+        );
 
     }
 
@@ -793,153 +1385,548 @@ function render() {
 
 
 /*
-=========================================================
-点击柱子
-=========================================================
+===========================================================
+添加拖拽事件
+===========================================================
 */
 
-function clickRod(index) {
+function addDragEvents(disk) {
+
+    disk.addEventListener(
+        "pointerdown",
+        startDrag
+    );
+
+}
+
+
+/*
+===========================================================
+开始拖拽
+===========================================================
+*/
+
+function startDrag(e) {
 
     if (gameFinished) {
         return;
     }
 
-    /*
-     * 第一次点击
-     * 选择来源柱
-     */
-    if (selectedRod === null) {
-
-        if (towers[index].length === 0) {
-
-            showMessage("这个柱子没有圆盘");
-
-            return;
-
-        }
-
-        selectedRod = index;
-
-        document
-            .getElementById("rod" + index)
-            .classList.add("selected");
-
-        showMessage(
-            "已选择 " +
-            ["A","B","C"][index] +
-            " 柱，请选择目标柱"
-        );
-
+    if (dragging) {
         return;
     }
 
-
-    /*
-     * 第二次点击
-     * 选择目标柱
-     */
-
-    if (selectedRod === index) {
-
-        clearSelection();
-
-        showMessage(
-            "取消选择，请重新选择圆盘"
-        );
-
-        return;
-    }
-
-
-    moveDisk(selectedRod, index);
-
-}
-
-
-/*
-=========================================================
-移动圆盘
-=========================================================
-*/
-
-function moveDisk(from, to) {
-
-    const source = towers[from];
-
-    const target = towers[to];
-
-    if (source.length === 0) {
-
-        clearSelection();
-
-        return;
-
-    }
 
     const disk =
-        source[source.length - 1];
+        e.currentTarget;
 
-    const targetTop =
-        target[target.length - 1];
-
-    /*
-     * 汉诺塔核心规则
-     *
-     * 大圆盘不能压在小圆盘上
-     */
-    if (
-        targetTop !== undefined &&
-        disk > targetTop
-    ) {
-
-        showMessage(
-            "❌ 不能把大圆盘放到小圆盘上面"
+    const from =
+        parseInt(
+            disk.dataset.rod
         );
 
+    /*
+     * 安全检查：
+     * 必须是最上面的圆盘
+     */
+
+    const top =
+        towers[from][
+            towers[from].length - 1
+        ];
+
+    const size =
+        parseInt(
+            disk.dataset.size
+        );
+
+    if (top !== size) {
+
         return;
+
     }
 
 
     /*
-     * 第一次有效移动
      * 开始计时
      */
 
-    if (moves === 0) {
+    if (moves === 0 && !startTime) {
 
         startTimer();
 
     }
 
 
+    dragging = true;
+
+    dragDisk = disk;
+
+    dragFrom = from;
+
+    dragPointerId =
+        e.pointerId;
+
+
     /*
-     * 保存历史
-     * 用于撤销
+     * 记录原来的位置
      */
 
-    history.push(
-        JSON.stringify(towers)
+    const rect =
+        disk.getBoundingClientRect();
+
+    const boardRect =
+        board.getBoundingClientRect();
+
+
+    dragOffsetX =
+        e.clientX -
+        rect.left -
+        rect.width / 2;
+
+    dragOffsetY =
+        e.clientY -
+        rect.top -
+        rect.height / 2;
+
+
+    /*
+     * 把圆盘从原容器拿出来
+     * 放进绝对定位拖拽层
+     */
+
+    dragOriginalParent =
+        disk.parentElement;
+
+    dragOriginalNextSibling =
+        disk.nextSibling;
+
+    dragOriginalTransform =
+        disk.style.transform;
+
+
+    board
+        .setPointerCapture(
+            e.pointerId
+        );
+
+
+    const x =
+        e.clientX -
+        boardRect.left -
+        rect.width / 2;
+
+    const y =
+        e.clientY -
+        boardRect.top -
+        rect.height / 2;
+
+
+    /*
+     * 从 DOM 中拿出来
+     */
+
+    disk.remove();
+
+    document
+        .getElementById("dragLayer")
+        .appendChild(disk);
+
+
+    disk.classList.add(
+        "dragging"
     );
 
 
-    source.pop();
+    disk.style.position =
+        "absolute";
 
-    target.push(disk);
+    disk.style.left =
+        x + "px";
+
+    disk.style.top =
+        y + "px";
+
+    disk.style.margin =
+        "0";
+
+    disk.style.transform =
+        "scale(1.05)";
+
+
+    /*
+     * 原来的塔暂时减少一个圆盘
+     */
+
+    towers[from].pop();
+
+    render();
+
+
+    showMessage(
+        "✋ 正在拖动圆盘 " +
+        size +
+        "，移动到目标柱后松手",
+        "good"
+    );
+
+
+    updateDropTarget(
+        e.clientX,
+        e.clientY
+    );
+
+}
+
+
+/*
+===========================================================
+拖拽移动
+===========================================================
+*/
+
+function moveDrag(e) {
+
+    if (
+        !dragging ||
+        e.pointerId !== dragPointerId
+    ) {
+        return;
+    }
+
+
+    const boardRect =
+        board.getBoundingClientRect();
+
+    const diskRect =
+        dragDisk.getBoundingClientRect();
+
+
+    let x =
+        e.clientX -
+        boardRect.left -
+        diskRect.width / 2;
+
+    let y =
+        e.clientY -
+        boardRect.top -
+        diskRect.height / 2;
+
+
+    /*
+     * 限制不要拖出游戏区域
+     */
+
+    x = Math.max(
+        0,
+        Math.min(
+            board.clientWidth -
+            diskRect.width,
+            x
+        )
+    );
+
+    y = Math.max(
+        0,
+        Math.min(
+            board.clientHeight -
+            diskRect.height,
+            y
+        )
+    );
+
+
+    dragDisk.style.left =
+        x + "px";
+
+    dragDisk.style.top =
+        y + "px";
+
+
+    updateDropTarget(
+        e.clientX,
+        e.clientY
+    );
+
+}
+
+
+/*
+===========================================================
+判断当前鼠标/手指在哪个柱子
+===========================================================
+*/
+
+function getTargetRod(clientX, clientY) {
+
+    const areas =
+        document.querySelectorAll(
+            ".rod-area"
+        );
+
+
+    for (
+        let i = 0;
+        i < areas.length;
+        i++
+    ) {
+
+        const rect =
+            areas[i]
+                .getBoundingClientRect();
+
+
+        /*
+         * 扩大可放置区域
+         * 拖过去比较容易
+         */
+
+        const extraX = 45;
+
+        if (
+            clientX >=
+                rect.left - extraX &&
+            clientX <=
+                rect.right + extraX &&
+            clientY >=
+                rect.top &&
+            clientY <=
+                rect.bottom
+        ) {
+
+            return i;
+
+        }
+
+    }
+
+
+    return -1;
+
+}
+
+
+/*
+===========================================================
+更新目标柱高亮
+===========================================================
+*/
+
+function updateDropTarget(
+    clientX,
+    clientY
+) {
+
+    const target =
+        getTargetRod(
+            clientX,
+            clientY
+        );
+
+
+    clearDropTargets();
+
+
+    if (
+        target === -1 ||
+        target === dragFrom
+    ) {
+
+        currentTarget = -1;
+
+        return;
+
+    }
+
+
+    const size =
+        parseInt(
+            dragDisk.dataset.size
+        );
+
+
+    const targetTop =
+        towers[target][
+            towers[target].length - 1
+        ];
+
+
+    /*
+     * 判断是否合法
+     */
+
+    if (
+        targetTop === undefined ||
+        size < targetTop
+    ) {
+
+        currentTarget =
+            target;
+
+        document
+            .querySelector(
+                `.rod-area[data-rod="${target}"]`
+            )
+            .classList.add(
+                "drop-target"
+            );
+
+    } else {
+
+        currentTarget = -1;
+
+        showMessage(
+            "❌ 这个圆盘太大，不能放在上面",
+            "bad"
+        );
+
+    }
+
+}
+
+
+/*
+===========================================================
+清除目标效果
+===========================================================
+*/
+
+function clearDropTargets() {
+
+    document
+        .querySelectorAll(
+            ".rod-area"
+        )
+        .forEach(
+            el =>
+                el.classList.remove(
+                    "drop-target"
+                )
+        );
+
+}
+
+
+/*
+===========================================================
+松手
+===========================================================
+*/
+
+function endDrag(e) {
+
+    if (
+        !dragging ||
+        e.pointerId !== dragPointerId
+    ) {
+
+        return;
+
+    }
+
+
+    const target =
+        currentTarget;
+
+
+    clearDropTargets();
+
+
+    /*
+     * 合法移动
+     */
+
+    if (
+        target !== -1 &&
+        target !== dragFrom
+    ) {
+
+        completeDrag(
+            target
+        );
+
+    } else {
+
+        /*
+         * 非法：
+         * 回到原来的柱子
+         */
+
+        cancelDrag();
+
+    }
+
+
+    dragging = false;
+
+    dragPointerId = null;
+
+}
+
+
+/*
+===========================================================
+完成拖拽
+===========================================================
+*/
+
+function completeDrag(target) {
+
+    const size =
+        parseInt(
+            dragDisk.dataset.size
+        );
+
+
+    /*
+     * 保存历史
+     */
+
+    history.push(
+        JSON.stringify(
+            towers
+        )
+    );
+
+
+    /*
+     * 圆盘加入目标柱
+     */
+
+    towers[target].push(
+        size
+    );
 
     moves++;
+
 
     document.getElementById("moves")
         .textContent = moves;
 
-    clearSelection();
+
+    /*
+     * 删除拖拽对象
+     */
+
+    dragDisk.remove();
+
+    dragDisk = null;
+
 
     render();
 
+
+    /*
+     * 播放轻微落下提示
+     */
+
     showMessage(
-        "移动成功： " +
-        ["A","B","C"][from] +
-        " → " +
-        ["A","B","C"][to]
+        "✓ 圆盘 " +
+        size +
+        " 已放到 " +
+        ["A","B","C"][target] +
+        " 柱",
+        "good"
     );
 
 
@@ -948,7 +1935,8 @@ function moveDisk(from, to) {
      */
 
     if (
-        towers[2].length === diskCount
+        towers[2].length ===
+        diskCount
     ) {
 
         finishGame();
@@ -959,116 +1947,158 @@ function moveDisk(from, to) {
 
 
 /*
-=========================================================
-撤销
-=========================================================
+===========================================================
+取消拖拽
+===========================================================
 */
 
-function undoMove() {
+function cancelDrag() {
 
-    if (history.length === 0) {
-
-        showMessage("目前没有可以撤销的操作");
-
-        return;
-
-    }
-
-    towers =
-        JSON.parse(
-            history.pop()
+    const size =
+        parseInt(
+            dragDisk.dataset.size
         );
 
-    moves--;
 
-    if (moves < 0) {
-        moves = 0;
-    }
+    /*
+     * 把圆盘放回原柱
+     */
 
-    document.getElementById("moves")
-        .textContent = moves;
+    towers[dragFrom].push(
+        size
+    );
 
-    if (moves === 0) {
 
-        clearInterval(timer);
+    dragDisk.remove();
 
-        startTime = null;
+    dragDisk = null;
 
-        document.getElementById("time")
-            .textContent = "00:00";
-
-    }
-
-    clearSelection();
 
     render();
 
-    showMessage("↩️ 已撤销一步");
+
+    showMessage(
+        "↩️ 已放回原来的位置",
+        "bad"
+    );
 
 }
 
 
 /*
-=========================================================
-选择状态
-=========================================================
+===========================================================
+鼠标/手指移动
+===========================================================
 */
 
-function clearSelection() {
+board.addEventListener(
+    "pointermove",
+    moveDrag
+);
 
-    selectedRod = null;
 
-    for (let i = 0; i < 3; i++) {
+/*
+===========================================================
+鼠标/手指松开
+===========================================================
+*/
 
-        document
-            .getElementById("rod" + i)
-            .classList.remove("selected");
+board.addEventListener(
+    "pointerup",
+    endDrag
+);
 
+board.addEventListener(
+    "pointercancel",
+    endDrag
+);
+
+
+/*
+===========================================================
+防止拖动时浏览器滚动
+===========================================================
+*/
+
+board.addEventListener(
+    "pointerdown",
+    e => {
+
+        if (
+            e.target.classList.contains(
+                "disk"
+            )
+        ) {
+
+            e.preventDefault();
+
+        }
+
+    },
+    {
+        passive: false
     }
-
-}
+);
 
 
 /*
-=========================================================
+===========================================================
 提示
-=========================================================
+===========================================================
 */
 
-function showMessage(text) {
+function showMessage(
+    text,
+    type = ""
+) {
 
-    document.getElementById("message")
-        .textContent = text;
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
 
 }
 
 
 /*
-=========================================================
+===========================================================
 计时器
-=========================================================
+===========================================================
 */
 
 function startTimer() {
 
-    startTime = Date.now();
+    startTime =
+        Date.now();
 
     clearInterval(timer);
 
-    timer = setInterval(() => {
 
-        if (!startTime) {
-            return;
-        }
+    timer =
+        setInterval(
+            () => {
 
-        const seconds =
-            Math.floor(
-                (Date.now() - startTime) / 1000
-            );
+                if (!startTime) {
+                    return;
+                }
 
-        updateTime(seconds);
 
-    }, 1000);
+                const seconds =
+                    Math.floor(
+                        (
+                            Date.now() -
+                            startTime
+                        ) / 1000
+                    );
+
+
+                updateTime(
+                    seconds
+                );
+
+            },
+            1000
+        );
 
 }
 
@@ -1076,24 +2106,98 @@ function startTimer() {
 function updateTime(seconds) {
 
     const minutes =
-        Math.floor(seconds / 60);
+        Math.floor(
+            seconds / 60
+        );
 
     const sec =
         seconds % 60;
 
-    document.getElementById("time")
-        .textContent =
-        String(minutes).padStart(2,"0") +
+
+    document.getElementById(
+        "time"
+    ).textContent =
+        String(minutes)
+            .padStart(2,"0") +
         ":" +
-        String(sec).padStart(2,"0");
+        String(sec)
+            .padStart(2,"0");
 
 }
 
 
 /*
-=========================================================
-完成
-=========================================================
+===========================================================
+撤销
+===========================================================
+*/
+
+function undoMove() {
+
+    if (dragging) {
+        return;
+    }
+
+
+    if (
+        history.length === 0
+    ) {
+
+        showMessage(
+            "目前没有可以撤销的操作"
+        );
+
+        return;
+
+    }
+
+
+    towers =
+        JSON.parse(
+            history.pop()
+        );
+
+
+    moves--;
+
+    if (moves < 0) {
+        moves = 0;
+    }
+
+
+    document.getElementById(
+        "moves"
+    ).textContent = moves;
+
+
+    if (moves === 0) {
+
+        clearInterval(timer);
+
+        startTime = null;
+
+        document.getElementById(
+            "time"
+        ).textContent =
+            "00:00";
+
+    }
+
+
+    render();
+
+
+    showMessage(
+        "↩️ 已撤销一步"
+    );
+
+}
+
+
+/*
+===========================================================
+完成游戏
+===========================================================
 */
 
 function finishGame() {
@@ -1102,30 +2206,52 @@ function finishGame() {
 
     clearInterval(timer);
 
+
     const finalTime =
-        document.getElementById("time")
-            .textContent;
+        document.getElementById(
+            "time"
+        ).textContent;
 
-    document.getElementById("winMoves")
-        .textContent = moves;
 
-    document.getElementById("winMinimum")
-        .textContent =
-        Math.pow(2, diskCount) - 1;
+    document.getElementById(
+        "winMoves"
+    ).textContent =
+        moves;
 
-    document.getElementById("winTime")
-        .textContent = finalTime;
 
-    document.getElementById("winOverlay")
-        .classList.add("show");
+    document.getElementById(
+        "winMinimum"
+    ).textContent =
+        Math.pow(
+            2,
+            diskCount
+        ) - 1;
+
+
+    document.getElementById(
+        "winTime"
+    ).textContent =
+        finalTime;
+
+
+    setTimeout(
+        () => {
+
+            winOverlay
+                .classList
+                .add("show");
+
+        },
+        250
+    );
 
 }
 
 
 /*
-=========================================================
+===========================================================
 重新开始
-=========================================================
+===========================================================
 */
 
 function restartGame() {
@@ -1136,13 +2262,45 @@ function restartGame() {
 
 
 /*
-=========================================================
-圆盘数量改变
-=========================================================
+===========================================================
+按钮
+===========================================================
 */
 
 document
-    .getElementById("diskCount")
+    .getElementById(
+        "restartBtn"
+    )
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+
+document
+    .getElementById(
+        "undoBtn"
+    )
+    .addEventListener(
+        "click",
+        undoMove
+    );
+
+
+document
+    .getElementById(
+        "winRestartBtn"
+    )
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+
+document
+    .getElementById(
+        "diskCount"
+    )
     .addEventListener(
         "change",
         restartGame
@@ -1150,9 +2308,9 @@ document
 
 
 /*
-=========================================================
-启动游戏
-=========================================================
+===========================================================
+启动
+===========================================================
 */
 
 initGame();
