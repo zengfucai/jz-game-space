@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<title>汉诺塔 · 拖拽挑战</title>
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=1.0,
+               user-scalable=no,
+               viewport-fit=cover">
+
+<title>JZ · 汉诺塔</title>
 
 <style>
+
+/* =========================================================
+   基础
+========================================================= */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -18,65 +30,79 @@
 html,
 body {
     width: 100%;
-    min-height: 100%;
+    height: 100%;
 }
 
 body {
-    min-height: 100vh;
-
     font-family:
         "Microsoft YaHei",
         "PingFang SC",
         Arial,
         sans-serif;
 
+    background:
+        radial-gradient(
+            circle at 20% 15%,
+            #263b72 0%,
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 85% 85%,
+            #342066 0%,
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #070a17,
+            #10162d 50%,
+            #080a16
+        );
+
     color: white;
 
-    background:
-        radial-gradient(circle at 20% 15%, #263b72 0%, transparent 35%),
-        radial-gradient(circle at 85% 85%, #342066 0%, transparent 35%),
-        linear-gradient(135deg, #070a17, #10162d 50%, #080a16);
+    overflow: hidden;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    padding: 18px;
-
-    overflow-x: hidden;
+    user-select: none;
+    -webkit-user-select: none;
 }
+
+button,
+select {
+    font-family: inherit;
+}
+
+/* =========================================================
+   整个游戏
+========================================================= */
 
 .game {
-    width: min(1100px, 100%);
+    width: 100%;
+    height: 100%;
 
-    padding: 24px;
+    display: flex;
+    flex-direction: column;
 
-    border-radius: 26px;
+    padding: 20px;
 
-    background: rgba(255,255,255,.065);
-
-    border: 1px solid rgba(255,255,255,.11);
-
-    box-shadow:
-        0 30px 90px rgba(0,0,0,.5),
-        inset 0 1px rgba(255,255,255,.08);
-
-    backdrop-filter: blur(18px);
+    gap: 14px;
 }
 
-/* =========================
-   标题
-========================= */
+/* =========================================================
+   PC 标题
+========================================================= */
 
 .header {
+    flex-shrink: 0;
+
     text-align: center;
-    margin-bottom: 20px;
 }
 
 .header h1 {
-    font-size: clamp(32px, 5vw, 50px);
+    font-size: 44px;
 
-    letter-spacing: 5px;
+    line-height: 1.05;
+
+    letter-spacing: 6px;
 
     background:
         linear-gradient(
@@ -95,65 +121,72 @@ body {
 .header p {
     margin-top: 7px;
 
-    color: #8995b8;
+    color: #7885a7;
 
-    font-size: 13px;
+    font-size: 12px;
 
-    letter-spacing: 2px;
+    letter-spacing: 3px;
 }
 
-/* =========================
-   控制
-========================= */
+/* =========================================================
+   PC 控制栏
+========================================================= */
 
-.controls {
+.pc-controls {
+    flex-shrink: 0;
+
     display: flex;
+
     justify-content: center;
     align-items: center;
 
     gap: 10px;
 
     flex-wrap: wrap;
-
-    margin-bottom: 18px;
 }
 
-.control-item {
+.control-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
     padding: 9px 13px;
 
-    border-radius: 12px;
+    border-radius: 11px;
 
     background: rgba(255,255,255,.055);
 
     border: 1px solid rgba(255,255,255,.08);
 
-    color: #c5cde5;
+    color: #c5cee5;
 
-    font-size: 14px;
+    font-size: 13px;
 }
 
 select {
-    margin-left: 5px;
-
     padding: 5px 9px;
-
-    border-radius: 8px;
-
-    background: #161d38;
 
     color: white;
 
-    border: 1px solid #3b4769;
+    background: #171e38;
+
+    border: 1px solid #3d496c;
+
+    border-radius: 7px;
 
     outline: none;
 }
 
 button {
-    border: none;
+    border: 0;
 
     padding: 10px 16px;
 
     border-radius: 10px;
+
+    color: white;
 
     background:
         linear-gradient(
@@ -162,20 +195,18 @@ button {
             #8058ff
         );
 
-    color: white;
-
     font-weight: bold;
 
     cursor: pointer;
 
-    transition: .2s;
-
-    box-shadow:
-        0 6px 18px rgba(80,100,255,.22);
+    transition:
+        transform .15s,
+        filter .15s;
 }
 
 button:hover {
     transform: translateY(-2px);
+
     filter: brightness(1.12);
 }
 
@@ -183,11 +214,13 @@ button:active {
     transform: scale(.96);
 }
 
-/* =========================
-   数据
-========================= */
+/* =========================================================
+   PC 数据
+========================================================= */
 
-.stats {
+.pc-stats {
+    flex-shrink: 0;
+
     display: grid;
 
     grid-template-columns:
@@ -195,43 +228,47 @@ button:active {
 
     gap: 10px;
 
-    margin-bottom: 18px;
+    width: min(800px, 100%);
+
+    margin: 0 auto;
 }
 
 .stat {
+    padding: 9px;
+
     text-align: center;
 
-    padding: 12px;
+    border-radius: 12px;
 
-    border-radius: 14px;
-
-    background: rgba(0,0,0,.19);
+    background: rgba(0,0,0,.18);
 
     border: 1px solid rgba(255,255,255,.055);
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: 10px;
 
-    color: #7884a6;
+    color: #7783a5;
 }
 
 .stat-value {
-    margin-top: 4px;
+    margin-top: 3px;
 
-    font-size: 21px;
+    font-size: 19px;
 
     font-weight: bold;
 }
 
-/* =========================
+/* =========================================================
    游戏棋盘
-========================= */
+========================================================= */
 
 .board {
     position: relative;
 
-    height: 470px;
+    flex: 1;
+
+    min-height: 0;
 
     overflow: hidden;
 
@@ -239,8 +276,8 @@ button:active {
 
     background:
         radial-gradient(
-            circle at 50% 20%,
-            rgba(120,150,255,.07),
+            circle at 50% 15%,
+            rgba(120,150,255,.075),
             transparent 55%
         ),
         linear-gradient(
@@ -251,22 +288,22 @@ button:active {
 
     border: 1px solid rgba(255,255,255,.075);
 
-    user-select: none;
-
     touch-action: none;
 }
 
-/* 地面 */
+/* =========================================================
+   地面
+========================================================= */
 
 .floor {
     position: absolute;
 
-    left: 5%;
-    right: 5%;
+    left: 6%;
+    right: 6%;
 
-    bottom: 47px;
+    bottom: 48px;
 
-    height: 9px;
+    height: 8px;
 
     border-radius: 10px;
 
@@ -279,55 +316,60 @@ button:active {
         );
 
     box-shadow:
-        0 0 18px rgba(120,150,255,.28);
+        0 0 18px rgba(120,150,255,.25);
 
     z-index: 1;
 }
 
-/* =========================
+/* =========================================================
    柱子区域
-========================= */
+========================================================= */
 
 .rod-area {
     position: absolute;
 
     top: 0;
-
     bottom: 0;
 
-    width: 33.333%;
-
-    cursor: default;
+    width: 33.333333%;
 
     z-index: 2;
+
+    pointer-events: none;
 }
 
-.rod-area:nth-child(1) {
+.rod-area[data-rod="0"] {
     left: 0;
 }
 
-.rod-area:nth-child(2) {
-    left: 33.333%;
+.rod-area[data-rod="1"] {
+    left: 33.333333%;
 }
 
-.rod-area:nth-child(3) {
-    left: 66.666%;
+.rod-area[data-rod="2"] {
+    left: 66.666666%;
 }
 
-/* 柱子 */
+/* =========================================================
+   柱子
+========================================================= */
 
 .rod {
     position: absolute;
 
-    width: 11px;
-
-    height: 290px;
-
     left: 50%;
 
-    bottom: 52px;
+    bottom: 54px;
 
-    transform: translateX(-50%);
+    width: 10px;
+
+    height: 62%;
+
+    min-height: 180px;
+    max-height: 330px;
+
+    transform:
+        translateX(-50%);
 
     border-radius: 10px;
 
@@ -335,7 +377,7 @@ button:active {
         linear-gradient(
             90deg,
             #6578ac,
-            #d8e0ff,
+            #dce4ff,
             #6578ac
         );
 
@@ -347,20 +389,19 @@ button:active {
         filter .2s;
 }
 
-/* 柱子顶部 */
-
 .rod::before {
     content: "";
 
     position: absolute;
 
-    width: 30px;
+    left: 50%;
+    top: -4px;
+
+    width: 32px;
     height: 9px;
 
-    left: 50%;
-    top: -3px;
-
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     border-radius: 8px;
 
@@ -373,11 +414,13 @@ button:active {
         );
 }
 
-/* 目标柱高亮 */
+/* =========================================================
+   目标柱
+========================================================= */
 
 .rod-area.drop-target .rod {
     box-shadow:
-        0 0 28px rgba(80,220,255,.9);
+        0 0 30px rgba(80,220,255,.95);
 
     filter: brightness(1.3);
 }
@@ -389,39 +432,43 @@ button:active {
 
     left: 50%;
 
-    bottom: 63px;
+    bottom: 61px;
 
-    width: 220px;
+    width: min(230px, 85%);
 
-    height: 65px;
+    height: 64px;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     border-radius: 50%;
 
-    border: 2px dashed rgba(85,220,255,.7);
+    border: 2px dashed
+        rgba(85,220,255,.7);
 
-    background: rgba(70,200,255,.06);
-
-    pointer-events: none;
+    background:
+        rgba(70,200,255,.055);
 }
 
-/* 柱子名称 */
+/* =========================================================
+   A B C
+========================================================= */
 
 .rod-label {
     position: absolute;
 
     left: 50%;
 
-    bottom: 9px;
+    bottom: 10px;
 
-    transform: translateX(-50%);
-
-    color: #aeb9d8;
+    transform:
+        translateX(-50%);
 
     font-size: 16px;
 
     font-weight: bold;
+
+    color: #aeb9d8;
 }
 
 .rod-hint {
@@ -429,33 +476,35 @@ button:active {
 
     left: 50%;
 
-    top: 14px;
+    top: 15px;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
-    color: #596682;
+    font-size: 11px;
 
-    font-size: 12px;
+    color: #56627f;
 
     white-space: nowrap;
 }
 
-/* =========================
+/* =========================================================
    圆盘容器
-========================= */
+========================================================= */
 
 .disks {
     position: absolute;
 
     left: 50%;
 
-    bottom: 61px;
+    bottom: 62px;
 
-    width: 220px;
+    width: min(230px, 92%);
 
-    height: 280px;
+    height: 62%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     display: flex;
 
@@ -470,9 +519,9 @@ button:active {
     z-index: 10;
 }
 
-/* =========================
+/* =========================================================
    圆盘
-========================= */
+========================================================= */
 
 .disk {
     position: relative;
@@ -488,24 +537,17 @@ button:active {
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-size: 12px;
 
     font-weight: bold;
 
-    color: rgba(255,255,255,.92);
+    color: rgba(255,255,255,.95);
 
     box-shadow:
         0 5px 10px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.28),
-        inset 0 -1px rgba(0,0,0,.12);
-
-    transition:
-        transform .2s ease,
-        filter .2s ease,
-        box-shadow .2s ease;
+        inset 0 1px rgba(255,255,255,.28);
 
     pointer-events: auto;
 
@@ -513,10 +555,15 @@ button:active {
 
     touch-action: none;
 
-    will-change: transform, left, top;
-}
+    will-change:
+        transform,
+        left,
+        top;
 
-/* 圆盘中间高光 */
+    transition:
+        filter .18s,
+        box-shadow .18s;
+}
 
 .disk::before {
     content: "";
@@ -524,7 +571,6 @@ button:active {
     position: absolute;
 
     left: 8%;
-
     right: 8%;
 
     top: 4px;
@@ -533,12 +579,15 @@ button:active {
 
     border-radius: 10px;
 
-    background: rgba(255,255,255,.14);
+    background:
+        rgba(255,255,255,.15);
 
     pointer-events: none;
 }
 
-/* 圆盘颜色 */
+/* =========================================================
+   圆盘颜色
+========================================================= */
 
 .disk[data-size="1"] {
     background:
@@ -614,14 +663,12 @@ button:active {
         );
 }
 
-/* 最上面的圆盘 */
+/* =========================================================
+   可拖圆盘
+========================================================= */
 
 .disk.top-disk {
     cursor: grab;
-
-    box-shadow:
-        0 6px 15px rgba(0,0,0,.45),
-        0 0 0 1px rgba(255,255,255,.08);
 }
 
 .disk.top-disk:hover {
@@ -631,23 +678,30 @@ button:active {
         translateY(-3px);
 }
 
-/* 被抓住 */
+/* =========================================================
+   被抓住
+========================================================= */
 
 .disk.dragging {
     cursor: grabbing;
 
-    filter: brightness(1.13);
+    filter: brightness(1.15);
 
     box-shadow:
-        0 18px 30px rgba(0,0,0,.45),
-        0 0 30px rgba(100,210,255,.32);
+        0 20px 35px rgba(0,0,0,.48),
+        0 0 30px
+        rgba(100,210,255,.35);
 
     z-index: 9999;
+
+    transform:
+        scale(1.07)
+        rotate(1deg);
 }
 
-/* =========================
-   拖拽中的浮动圆盘
-========================= */
+/* =========================================================
+   拖拽层
+========================================================= */
 
 .drag-layer {
     position: absolute;
@@ -659,22 +713,20 @@ button:active {
     z-index: 1000;
 }
 
-/* =========================
+/* =========================================================
    提示
-========================= */
+========================================================= */
 
 .message {
-    min-height: 25px;
+    flex-shrink: 0;
 
-    margin-top: 14px;
+    min-height: 20px;
 
     text-align: center;
 
-    color: #93a0c4;
+    color: #8290b3;
 
-    font-size: 14px;
-
-    transition: color .2s;
+    font-size: 13px;
 }
 
 .message.good {
@@ -685,9 +737,25 @@ button:active {
     color: #ff7998;
 }
 
-/* =========================
-   胜利弹窗
-========================= */
+/* =========================================================
+   手机底部控制栏
+========================================================= */
+
+.mobile-controls {
+    display: none;
+}
+
+/* =========================================================
+   手机顶部状态
+========================================================= */
+
+.mobile-top {
+    display: none;
+}
+
+/* =========================================================
+   胜利
+========================================================= */
 
 .win-overlay {
     position: fixed;
@@ -703,9 +771,11 @@ button:active {
 
     padding: 20px;
 
-    background: rgba(3,5,15,.78);
+    background:
+        rgba(3,5,15,.8);
 
-    backdrop-filter: blur(10px);
+    backdrop-filter:
+        blur(10px);
 }
 
 .win-overlay.show {
@@ -715,11 +785,11 @@ button:active {
 .win {
     width: min(430px, 100%);
 
-    padding: 35px;
+    padding: 32px;
 
     text-align: center;
 
-    border-radius: 25px;
+    border-radius: 24px;
 
     background:
         linear-gradient(
@@ -728,205 +798,711 @@ button:active {
             #10162e
         );
 
-    border: 1px solid rgba(255,255,255,.12);
+    border:
+        1px solid
+        rgba(255,255,255,.12);
 
     box-shadow:
-        0 35px 100px rgba(0,0,0,.65);
+        0 35px 100px
+        rgba(0,0,0,.65);
 
-    animation: winPop .35s ease;
+    animation:
+        winPop .35s ease;
 }
 
 @keyframes winPop {
 
     from {
         opacity: 0;
-        transform: scale(.78) translateY(20px);
+
+        transform:
+            scale(.8)
+            translateY(20px);
     }
 
     to {
         opacity: 1;
-        transform: scale(1) translateY(0);
+
+        transform:
+            scale(1)
+            translateY(0);
     }
 
 }
 
 .win-icon {
-    font-size: 64px;
+    font-size: 60px;
 }
 
 .win h2 {
-    margin-top: 8px;
+    margin-top: 7px;
 
-    font-size: 30px;
+    font-size: 29px;
 }
 
 .win p {
-    margin-top: 8px;
+    margin-top: 7px;
 
     color: #aab5d4;
 
-    line-height: 1.7;
+    font-size: 13px;
 }
 
 .win-score {
-    margin: 20px 0;
+    margin: 18px 0;
 
-    padding: 15px;
+    padding: 14px;
 
-    border-radius: 15px;
+    border-radius: 14px;
 
-    background: rgba(255,255,255,.05);
-
-    color: #c6d0e8;
+    background:
+        rgba(255,255,255,.05);
 
     line-height: 1.9;
+
+    color: #c6d0e8;
 }
 
-/* =========================
-   底部
-========================= */
 
-.footer {
-    margin-top: 15px;
+/* =========================================================
+   =========================================================
+   手机竖屏
+   =========================================================
+   ========================================================= */
 
-    text-align: center;
-
-    color: #56627f;
-
-    font-size: 12px;
-}
-
-/* =========================
-   手机
-========================= */
-
-@media (max-width: 650px) {
+@media (max-width: 700px) and (orientation: portrait) {
 
     body {
-        padding: 7px;
+        background:
+            radial-gradient(
+                circle at 20% 10%,
+                #1d2d5b,
+                transparent 40%
+            ),
+            linear-gradient(
+                160deg,
+                #070a17,
+                #10162d
+            );
     }
 
     .game {
-        padding: 13px;
+        padding:
+            max(8px, env(safe-area-inset-top))
+            8px
+            max(8px, env(safe-area-inset-bottom))
+            8px;
 
-        border-radius: 19px;
+        gap: 6px;
     }
 
+    /* -----------------------------------------
+       手机标题：非常小
+    ----------------------------------------- */
+
     .header {
-        margin-bottom: 13px;
+        height: 34px;
+
+        display: flex;
+
+        justify-content: center;
+        align-items: center;
     }
 
     .header h1 {
-        font-size: 31px;
-    }
+        font-size: 24px;
 
-    .stats {
-        grid-template-columns:
-            repeat(2, 1fr);
-    }
-
-    .board {
-        height: 430px;
-    }
-
-    .rod {
-        height: 270px;
-    }
-
-    .disks {
-        bottom: 61px;
-
-        width: 200px;
-    }
-
-    .disk {
-        height: 30px;
-    }
-
-    .rod-area.drop-target::after {
-        width: 150px;
-    }
-
-    .footer {
-        display: none;
-    }
-}
-
-/* 小屏横向 */
-
-@media (max-height: 520px) and (orientation: landscape) {
-
-    body {
-        padding: 5px;
-    }
-
-    .game {
-        padding: 10px;
-    }
-
-    .header {
-        margin-bottom: 7px;
-    }
-
-    .header h1 {
-        font-size: 25px;
+        letter-spacing: 4px;
     }
 
     .header p {
         display: none;
     }
 
-    .controls {
-        margin-bottom: 7px;
+    /* -----------------------------------------
+       隐藏 PC 控件
+    ----------------------------------------- */
+
+    .pc-controls,
+    .pc-stats,
+    .message,
+    .footer {
+        display: none;
     }
 
-    .stats {
-        margin-bottom: 7px;
+    /* -----------------------------------------
+       手机顶部状态
+    ----------------------------------------- */
+
+    .mobile-top {
+        display: flex;
+
+        flex-shrink: 0;
+
+        height: 35px;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 8px;
+    }
+
+    .mobile-stat {
+        min-width: 74px;
+
+        padding: 6px 9px;
+
+        border-radius: 9px;
+
+        background:
+            rgba(0,0,0,.22);
+
+        border:
+            1px solid
+            rgba(255,255,255,.07);
+
+        text-align: center;
+
+        font-size: 11px;
+
+        color: #a9b4d0;
+    }
+
+    .mobile-stat strong {
+        margin-left: 3px;
+
+        color: white;
+
+        font-size: 13px;
+    }
+
+    /* -----------------------------------------
+       游戏区
+       核心！
+       占手机绝大多数空间
+    ----------------------------------------- */
+
+    .board {
+        flex: 1;
+
+        min-height: 0;
+
+        width: 100%;
+
+        border-radius: 17px;
+    }
+
+    .floor {
+        left: 4%;
+        right: 4%;
+
+        bottom: 36px;
+
+        height: 7px;
+    }
+
+    /* -----------------------------------------
+       手机柱子
+    ----------------------------------------- */
+
+    .rod {
+        bottom: 41px;
+
+        width: 8px;
+
+        height: 68%;
+
+        min-height: 180px;
+
+        max-height: none;
+    }
+
+    .rod::before {
+        width: 27px;
+
+        height: 8px;
+    }
+
+    /* -----------------------------------------
+       手机圆盘
+       加大高度，方便手指抓
+    ----------------------------------------- */
+
+    .disks {
+        bottom: 48px;
+
+        height: 68%;
+
+        width: 94%;
+    }
+
+    .disk {
+        height: 31px;
+
+        margin-top: 2px;
+
+        border-radius: 8px;
+
+        font-size: 10px;
+    }
+
+    /* -----------------------------------------
+       柱子名字
+    ----------------------------------------- */
+
+    .rod-label {
+        bottom: 7px;
+
+        font-size: 14px;
+    }
+
+    .rod-hint {
+        display: none;
+    }
+
+    /* -----------------------------------------
+       手机底部控制
+    ----------------------------------------- */
+
+    .mobile-controls {
+        display: flex;
+
+        flex-shrink: 0;
+
+        height: 48px;
+
+        align-items: center;
+
+        justify-content: center;
+
+        gap: 7px;
+    }
+
+    .mobile-count {
+        height: 42px;
+
+        padding: 0 10px;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        border-radius: 10px;
+
+        background:
+            rgba(255,255,255,.065);
+
+        border:
+            1px solid
+            rgba(255,255,255,.08);
+
+        color: #b8c2db;
+
+        font-size: 11px;
+    }
+
+    .mobile-count select {
+        padding: 4px 5px;
+
+        font-size: 12px;
+    }
+
+    .mobile-controls button {
+        width: 43px;
+
+        height: 42px;
+
+        padding: 0;
+
+        font-size: 18px;
+
+        border-radius: 10px;
+    }
+
+    /* -----------------------------------------
+       手机胜利弹窗
+    ----------------------------------------- */
+
+    .win {
+        padding: 26px 20px;
+
+        border-radius: 20px;
+    }
+
+    .win-icon {
+        font-size: 52px;
+    }
+
+    .win h2 {
+        font-size: 25px;
+    }
+
+}
+
+
+/* =========================================================
+   =========================================================
+   手机横屏
+   =========================================================
+   ========================================================= */
+
+@media (max-width: 900px)
+       and (orientation: landscape) {
+
+    body {
+        background:
+            linear-gradient(
+                135deg,
+                #070a17,
+                #10162d
+            );
+    }
+
+    .game {
+
+        padding:
+            max(5px, env(safe-area-inset-top))
+            max(7px, env(safe-area-inset-right))
+            max(5px, env(safe-area-inset-bottom))
+            max(7px, env(safe-area-inset-left));
+
+        gap: 4px;
+
+    }
+
+    /* -----------------------------------------
+       横屏标题
+    ----------------------------------------- */
+
+    .header {
+        height: 26px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+
+        letter-spacing: 4px;
+    }
+
+    .header p {
+        display: none;
+    }
+
+    /* -----------------------------------------
+       隐藏 PC
+    ----------------------------------------- */
+
+    .pc-controls,
+    .pc-stats,
+    .message,
+    .footer {
+        display: none;
+    }
+
+    /* -----------------------------------------
+       顶部数据
+    ----------------------------------------- */
+
+    .mobile-top {
+        display: flex;
+
+        position: absolute;
+
+        top: 5px;
+
+        left: 50%;
+
+        transform:
+            translateX(-50%);
+
+        z-index: 30;
+
+        gap: 5px;
+    }
+
+    .mobile-stat {
+        padding: 3px 7px;
+
+        border-radius: 7px;
+
+        background:
+            rgba(0,0,0,.35);
+
+        font-size: 9px;
+
+        color: #aab4ce;
+    }
+
+    .mobile-stat strong {
+        color: white;
+
+        font-size: 10px;
+    }
+
+    /* -----------------------------------------
+       横屏游戏区
+       几乎占满
+    ----------------------------------------- */
+
+    .board {
+        flex: 1;
+
+        min-height: 0;
+
+        border-radius: 14px;
+    }
+
+    .floor {
+        bottom: 27px;
+
+        height: 6px;
+
+        left: 4%;
+        right: 4%;
+    }
+
+    /* -----------------------------------------
+       柱子
+    ----------------------------------------- */
+
+    .rod {
+        bottom: 32px;
+
+        height: 72%;
+
+        min-height: 130px;
+
+        width: 7px;
+    }
+
+    .rod::before {
+        width: 24px;
+
+        height: 7px;
+    }
+
+    /* -----------------------------------------
+       圆盘
+    ----------------------------------------- */
+
+    .disks {
+        bottom: 38px;
+
+        height: 72%;
+
+        width: 92%;
+    }
+
+    .disk {
+        height: 25px;
+
+        margin-top: 1px;
+
+        border-radius: 7px;
+
+        font-size: 9px;
+    }
+
+    /* -----------------------------------------
+       A B C
+    ----------------------------------------- */
+
+    .rod-label {
+        bottom: 4px;
+
+        font-size: 12px;
+    }
+
+    .rod-hint {
+        display: none;
+    }
+
+    /* -----------------------------------------
+       底部控制
+    ----------------------------------------- */
+
+    .mobile-controls {
+        display: flex;
+
+        position: absolute;
+
+        right: 7px;
+
+        bottom: 7px;
+
+        z-index: 40;
+
+        gap: 5px;
+    }
+
+    .mobile-count {
+        height: 31px;
+
+        padding: 0 7px;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 3px;
+
+        border-radius: 8px;
+
+        background:
+            rgba(0,0,0,.45);
+
+        border:
+            1px solid
+            rgba(255,255,255,.08);
+
+        color: #aab5d0;
+
+        font-size: 9px;
+    }
+
+    .mobile-count select {
+        padding: 2px 3px;
+
+        font-size: 10px;
+    }
+
+    .mobile-controls button {
+        width: 32px;
+
+        height: 31px;
+
+        padding: 0;
+
+        border-radius: 8px;
+
+        font-size: 14px;
+    }
+
+}
+
+
+/* =========================================================
+   很矮的手机横屏
+========================================================= */
+
+@media (max-height: 400px)
+       and (orientation: landscape) {
+
+    .header {
+        display: none;
+    }
+
+    .game {
+        padding: 3px;
     }
 
     .board {
-        height: 330px;
+        border-radius: 10px;
     }
 
     .rod {
-        height: 220px;
+        bottom: 25px;
+
+        height: 76%;
+
+        min-height: 100px;
     }
 
     .disks {
-        height: 220px;
+        bottom: 31px;
+
+        height: 76%;
     }
+
+    .floor {
+        bottom: 21px;
+    }
+
+    .rod-label {
+        bottom: 2px;
+    }
+
+    .mobile-controls {
+        right: 4px;
+        bottom: 4px;
+    }
+
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+
 <div class="game">
 
+
+    <!-- =====================================================
+         标题
+    ====================================================== -->
+
     <div class="header">
+
         <h1>汉诺塔</h1>
-        <p>HANOI TOWER · DRAG & DROP</p>
+
+        <p>
+            HANOI TOWER · DRAG & DROP
+        </p>
+
     </div>
 
-    <div class="controls">
 
-        <div class="control-item">
-            圆盘：
+    <!-- =====================================================
+         PC 控制
+    ====================================================== -->
+
+    <div class="pc-controls">
+
+        <div class="control-box">
+
+            圆盘
 
             <select id="diskCount">
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5" selected>5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
+
+                <option value="3">
+                    3
+                </option>
+
+                <option value="4">
+                    4
+                </option>
+
+                <option value="5" selected>
+                    5
+                </option>
+
+                <option value="6">
+                    6
+                </option>
+
+                <option value="7">
+                    7
+                </option>
+
+                <option value="8">
+                    8
+                </option>
+
             </select>
+
         </div>
+
 
         <button id="restartBtn">
             🔄 重新开始
         </button>
+
 
         <button id="undoBtn">
             ↩️ 撤销
@@ -935,78 +1511,131 @@ button:active {
     </div>
 
 
-    <div class="stats">
+    <!-- =====================================================
+         PC 数据
+    ====================================================== -->
+
+    <div class="pc-stats">
 
         <div class="stat">
+
             <div class="stat-label">
                 当前步数
             </div>
 
-            <div class="stat-value"
-                 id="moves">
+            <div
+                class="stat-value"
+                id="moves">
                 0
             </div>
+
         </div>
 
 
         <div class="stat">
+
             <div class="stat-label">
                 最少步数
             </div>
 
-            <div class="stat-value"
-                 id="minimum">
+            <div
+                class="stat-value"
+                id="minimum">
                 31
             </div>
+
         </div>
 
 
         <div class="stat">
+
             <div class="stat-label">
                 用时
             </div>
 
-            <div class="stat-value"
-                 id="time">
+            <div
+                class="stat-value"
+                id="time">
                 00:00
             </div>
+
         </div>
 
 
         <div class="stat">
+
             <div class="stat-label">
                 圆盘数量
             </div>
 
-            <div class="stat-value"
-                 id="count">
+            <div
+                class="stat-value"
+                id="count">
                 5
             </div>
+
         </div>
 
     </div>
 
 
-    <!-- 游戏区域 -->
+    <!-- =====================================================
+         手机顶部状态
+    ====================================================== -->
 
-    <div class="board"
-         id="board">
+    <div class="mobile-top">
+
+        <div class="mobile-stat">
+
+            步数
+
+            <strong id="mobileMoves">
+                0
+            </strong>
+
+        </div>
+
+
+        <div class="mobile-stat">
+
+            ⏱
+
+            <strong id="mobileTime">
+                00:00
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         游戏区
+    ====================================================== -->
+
+    <div
+        class="board"
+        id="board">
+
 
         <div class="floor"></div>
 
 
         <!-- A -->
 
-        <div class="rod-area"
-             data-rod="0">
+        <div
+            class="rod-area"
+            data-rod="0">
 
             <div class="rod"></div>
 
-            <div class="disks"
-                 id="disks0"></div>
+            <div
+                class="disks"
+                id="disks0">
+            </div>
 
             <div class="rod-hint">
-                拖动圆盘
+                拖动
             </div>
 
             <div class="rod-label">
@@ -1018,16 +1647,19 @@ button:active {
 
         <!-- B -->
 
-        <div class="rod-area"
-             data-rod="1">
+        <div
+            class="rod-area"
+            data-rod="1">
 
             <div class="rod"></div>
 
-            <div class="disks"
-                 id="disks1"></div>
+            <div
+                class="disks"
+                id="disks1">
+            </div>
 
             <div class="rod-hint">
-                放到这里
+                放这里
             </div>
 
             <div class="rod-label">
@@ -1039,16 +1671,19 @@ button:active {
 
         <!-- C -->
 
-        <div class="rod-area"
-             data-rod="2">
+        <div
+            class="rod-area"
+            data-rod="2">
 
             <div class="rod"></div>
 
-            <div class="disks"
-                 id="disks2"></div>
+            <div
+                class="disks"
+                id="disks2">
+            </div>
 
             <div class="rod-hint">
-                放到这里
+                放这里
             </div>
 
             <div class="rod-label">
@@ -1060,34 +1695,93 @@ button:active {
 
         <!-- 拖拽层 -->
 
-        <div class="drag-layer"
-             id="dragLayer">
+        <div
+            class="drag-layer"
+            id="dragLayer">
         </div>
 
     </div>
 
 
-    <div class="message"
-         id="message">
+    <!-- =====================================================
+         手机底部控制
+    ====================================================== -->
+
+    <div class="mobile-controls">
+
+        <div class="mobile-count">
+
+            盘
+
+            <select id="mobileDiskCount">
+
+                <option value="3">
+                    3
+                </option>
+
+                <option value="4">
+                    4
+                </option>
+
+                <option value="5" selected>
+                    5
+                </option>
+
+                <option value="6">
+                    6
+                </option>
+
+                <option value="7">
+                    7
+                </option>
+
+                <option value="8">
+                    8
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            id="mobileUndoBtn"
+            title="撤销">
+            ↩
+        </button>
+
+
+        <button
+            id="mobileRestartBtn"
+            title="重新开始">
+            ↻
+        </button>
+
+    </div>
+
+
+    <!-- PC 提示 -->
+
+    <div
+        class="message"
+        id="message">
 
         👆 按住最上面的圆盘，把它拖到另一根柱子
 
     </div>
 
 
-    <div class="footer">
-
-        大圆盘不能放在小圆盘上面 · 拖拽操作
-
-    </div>
-
 </div>
 
 
-<!-- 胜利 -->
+<!-- =========================================================
+     胜利弹窗
+========================================================= -->
 
-<div class="win-overlay"
-     id="winOverlay">
+<div
+    class="win-overlay"
+    id="winOverlay">
+
 
     <div class="win">
 
@@ -1095,13 +1789,16 @@ button:active {
             🏆
         </div>
 
+
         <h2>
             挑战成功！
         </h2>
 
+
         <p>
             所有圆盘已经移动到 C 柱
         </p>
+
 
         <div class="win-score">
 
@@ -1128,6 +1825,7 @@ button:active {
 
         </div>
 
+
         <button id="winRestartBtn">
             🔄 再玩一次
         </button>
@@ -1139,11 +1837,9 @@ button:active {
 
 <script>
 
-/*
-===========================================================
-汉诺塔 · 拖拽版
-===========================================================
-*/
+/* =========================================================
+   汉诺塔核心
+========================================================= */
 
 let diskCount = 5;
 
@@ -1164,11 +1860,9 @@ let timer = null;
 let gameFinished = false;
 
 
-/*
-===========================================================
-拖拽状态
-===========================================================
-*/
+/* =========================================================
+   拖拽状态
+========================================================= */
 
 let dragging = false;
 
@@ -1178,24 +1872,12 @@ let dragFrom = -1;
 
 let dragPointerId = null;
 
-let dragOffsetX = 0;
-
-let dragOffsetY = 0;
-
-let dragOriginalParent = null;
-
-let dragOriginalNextSibling = null;
-
-let dragOriginalTransform = "";
-
 let currentTarget = -1;
 
 
-/*
-===========================================================
-DOM
-===========================================================
-*/
+/* =========================================================
+   DOM
+========================================================= */
 
 const board =
     document.getElementById("board");
@@ -1207,11 +1889,9 @@ const winOverlay =
     document.getElementById("winOverlay");
 
 
-/*
-===========================================================
-初始化
-===========================================================
-*/
+/* =========================================================
+   初始化
+========================================================= */
 
 function initGame() {
 
@@ -1222,17 +1902,16 @@ function initGame() {
             ).value
         );
 
+
     towers = [
         [],
         [],
         []
     ];
 
+
     /*
-     * 最大圆盘在最下面
-     *
-     * 数组最后一个
-     * 是最上面的圆盘
+     * 最大盘在下面
      */
 
     for (
@@ -1245,15 +1924,18 @@ function initGame() {
 
     }
 
+
     moves = 0;
 
     history = [];
 
     startTime = null;
 
-    gameFinished = false;
-
     clearInterval(timer);
+
+    timer = null;
+
+    gameFinished = false;
 
     dragging = false;
 
@@ -1261,47 +1943,127 @@ function initGame() {
 
     dragFrom = -1;
 
+    dragPointerId = null;
+
     currentTarget = -1;
 
-    document.getElementById("moves")
-        .textContent = "0";
 
-    document.getElementById("count")
-        .textContent = diskCount;
+    document.getElementById(
+        "moves"
+    ).textContent = "0";
 
-    document.getElementById("minimum")
-        .textContent =
-        Math.pow(2, diskCount) - 1;
 
-    document.getElementById("time")
-        .textContent = "00:00";
+    document.getElementById(
+        "mobileMoves"
+    ).textContent = "0";
 
-    winOverlay.classList.remove("show");
+
+    document.getElementById(
+        "count"
+    ).textContent =
+        diskCount;
+
+
+    document.getElementById(
+        "minimum"
+    ).textContent =
+        Math.pow(
+            2,
+            diskCount
+        ) - 1;
+
+
+    document.getElementById(
+        "time"
+    ).textContent =
+        "00:00";
+
+
+    document.getElementById(
+        "mobileTime"
+    ).textContent =
+        "00:00";
+
+
+    document.getElementById(
+        "diskCount"
+    ).value =
+        diskCount;
+
+
+    document.getElementById(
+        "mobileDiskCount"
+    ).value =
+        diskCount;
+
+
+    winOverlay.classList.remove(
+        "show"
+    );
+
+
+    clearDropTargets();
+
 
     showMessage(
         "👆 按住最上面的圆盘，把它拖到另一根柱子"
     );
+
 
     render();
 
 }
 
 
-/*
-===========================================================
-计算圆盘宽度
-===========================================================
-*/
+/* =========================================================
+   圆盘宽度
+========================================================= */
 
 function getDiskWidth(size) {
 
-    const min = 55;
+    /*
+     * 手机和 PC 使用不同宽度
+     */
 
-    const max = 195;
+    const mobile =
+        window.innerWidth <= 700;
+
+
+    if (mobile) {
+
+        const min =
+            window.innerWidth < 400
+                ? 58
+                : 64;
+
+        const max =
+            window.innerWidth < 400
+                ? 155
+                : 180;
+
+
+        if (diskCount === 1) {
+            return max;
+        }
+
+
+        return min +
+            (size - 1) /
+            (diskCount - 1) *
+            (max - min);
+
+    }
+
+
+    const min = 60;
+
+    const max = 205;
+
 
     if (diskCount === 1) {
         return max;
     }
+
 
     return min +
         (size - 1) /
@@ -1311,25 +2073,28 @@ function getDiskWidth(size) {
 }
 
 
-/*
-===========================================================
-绘制圆盘
-===========================================================
-*/
+/* =========================================================
+   绘制
+========================================================= */
 
 function render() {
 
-    for (let i = 0; i < 3; i++) {
+    for (
+        let rod = 0;
+        rod < 3;
+        rod++
+    ) {
 
         const container =
             document.getElementById(
-                "disks" + i
+                "disks" + rod
             );
+
 
         container.innerHTML = "";
 
 
-        towers[i].forEach(
+        towers[rod].forEach(
             (size, index) => {
 
                 const disk =
@@ -1337,16 +2102,22 @@ function render() {
                         "div"
                     );
 
-                disk.className = "disk";
+
+                disk.className =
+                    "disk";
+
 
                 disk.dataset.size =
                     size;
 
+
                 disk.dataset.rod =
-                    i;
+                    rod;
+
 
                 disk.textContent =
                     size;
+
 
                 disk.style.width =
                     getDiskWidth(size)
@@ -1354,20 +2125,22 @@ function render() {
 
 
                 /*
-                 * 最上面的圆盘
-                 * 才能拖
+                 * 只有最上面的可以拖
                  */
 
                 if (
                     index ===
-                    towers[i].length - 1
+                    towers[rod].length - 1
                 ) {
 
                     disk.classList.add(
                         "top-disk"
                     );
 
-                    addDragEvents(disk);
+
+                    addDragEvents(
+                        disk
+                    );
 
                 }
 
@@ -1384,11 +2157,9 @@ function render() {
 }
 
 
-/*
-===========================================================
-添加拖拽事件
-===========================================================
-*/
+/* =========================================================
+   拖拽事件
+========================================================= */
 
 function addDragEvents(disk) {
 
@@ -1400,17 +2171,16 @@ function addDragEvents(disk) {
 }
 
 
-/*
-===========================================================
-开始拖拽
-===========================================================
-*/
+/* =========================================================
+   开始拖
+========================================================= */
 
 function startDrag(e) {
 
     if (gameFinished) {
         return;
     }
+
 
     if (dragging) {
         return;
@@ -1420,14 +2190,21 @@ function startDrag(e) {
     const disk =
         e.currentTarget;
 
+
     const from =
         parseInt(
             disk.dataset.rod
         );
 
+
+    const size =
+        parseInt(
+            disk.dataset.size
+        );
+
+
     /*
-     * 安全检查：
-     * 必须是最上面的圆盘
+     * 安全检查
      */
 
     const top =
@@ -1435,15 +2212,9 @@ function startDrag(e) {
             towers[from].length - 1
         ];
 
-    const size =
-        parseInt(
-            disk.dataset.size
-        );
 
     if (top !== size) {
-
         return;
-
     }
 
 
@@ -1451,7 +2222,10 @@ function startDrag(e) {
      * 开始计时
      */
 
-    if (moves === 0 && !startTime) {
+    if (
+        moves === 0 &&
+        !startTime
+    ) {
 
         startTimer();
 
@@ -1468,10 +2242,6 @@ function startDrag(e) {
         e.pointerId;
 
 
-    /*
-     * 记录原来的位置
-     */
-
     const rect =
         disk.getBoundingClientRect();
 
@@ -1479,42 +2249,15 @@ function startDrag(e) {
         board.getBoundingClientRect();
 
 
-    dragOffsetX =
-        e.clientX -
-        rect.left -
-        rect.width / 2;
-
-    dragOffsetY =
-        e.clientY -
-        rect.top -
-        rect.height / 2;
-
-
     /*
-     * 把圆盘从原容器拿出来
-     * 放进绝对定位拖拽层
+     * 圆盘原来的位置
      */
-
-    dragOriginalParent =
-        disk.parentElement;
-
-    dragOriginalNextSibling =
-        disk.nextSibling;
-
-    dragOriginalTransform =
-        disk.style.transform;
-
-
-    board
-        .setPointerCapture(
-            e.pointerId
-        );
-
 
     const x =
         e.clientX -
         boardRect.left -
         rect.width / 2;
+
 
     const y =
         e.clientY -
@@ -1523,14 +2266,19 @@ function startDrag(e) {
 
 
     /*
-     * 从 DOM 中拿出来
+     * 从原来的 DOM 中取出来
      */
 
     disk.remove();
 
+
     document
-        .getElementById("dragLayer")
-        .appendChild(disk);
+        .getElementById(
+            "dragLayer"
+        )
+        .appendChild(
+            disk
+        );
 
 
     disk.classList.add(
@@ -1541,32 +2289,44 @@ function startDrag(e) {
     disk.style.position =
         "absolute";
 
+
     disk.style.left =
         x + "px";
+
 
     disk.style.top =
         y + "px";
 
+
     disk.style.margin =
         "0";
 
-    disk.style.transform =
-        "scale(1.05)";
-
 
     /*
-     * 原来的塔暂时减少一个圆盘
+     * 原柱减少一个盘
      */
 
     towers[from].pop();
 
+
     render();
 
 
+    /*
+     * 捕获手指
+     */
+
+    try {
+
+        board.setPointerCapture(
+            e.pointerId
+        );
+
+    } catch (err) {}
+
+
     showMessage(
-        "✋ 正在拖动圆盘 " +
-        size +
-        "，移动到目标柱后松手",
+        "✋ 拖动中……把圆盘移动到目标柱",
         "good"
     );
 
@@ -1576,20 +2336,22 @@ function startDrag(e) {
         e.clientY
     );
 
+
+    e.preventDefault();
+
 }
 
 
-/*
-===========================================================
-拖拽移动
-===========================================================
-*/
+/* =========================================================
+   拖动
+========================================================= */
 
 function moveDrag(e) {
 
     if (
         !dragging ||
-        e.pointerId !== dragPointerId
+        e.pointerId !==
+            dragPointerId
     ) {
         return;
     }
@@ -1598,39 +2360,44 @@ function moveDrag(e) {
     const boardRect =
         board.getBoundingClientRect();
 
-    const diskRect =
+
+    const rect =
         dragDisk.getBoundingClientRect();
 
 
     let x =
         e.clientX -
         boardRect.left -
-        diskRect.width / 2;
+        rect.width / 2;
+
 
     let y =
         e.clientY -
         boardRect.top -
-        diskRect.height / 2;
+        rect.height / 2;
 
 
     /*
-     * 限制不要拖出游戏区域
+     * 限制在棋盘内
      */
 
     x = Math.max(
-        0,
+        2,
         Math.min(
             board.clientWidth -
-            diskRect.width,
+            rect.width -
+            2,
             x
         )
     );
 
+
     y = Math.max(
-        0,
+        2,
         Math.min(
             board.clientHeight -
-            diskRect.height,
+            rect.height -
+            2,
             y
         )
     );
@@ -1638,6 +2405,7 @@ function moveDrag(e) {
 
     dragDisk.style.left =
         x + "px";
+
 
     dragDisk.style.top =
         y + "px";
@@ -1648,16 +2416,20 @@ function moveDrag(e) {
         e.clientY
     );
 
+
+    e.preventDefault();
+
 }
 
 
-/*
-===========================================================
-判断当前鼠标/手指在哪个柱子
-===========================================================
-*/
+/* =========================================================
+   判断目标柱
+========================================================= */
 
-function getTargetRod(clientX, clientY) {
+function getTargetRod(
+    clientX,
+    clientY
+) {
 
     const areas =
         document.querySelectorAll(
@@ -1677,19 +2449,29 @@ function getTargetRod(clientX, clientY) {
 
 
         /*
-         * 扩大可放置区域
-         * 拖过去比较容易
+         * 横向扩大目标区域
+         *
+         * 手机拖拽更容易
          */
 
-        const extraX = 45;
+        const extraX =
+            window.innerWidth <= 700
+                ? 25
+                : 45;
+
 
         if (
             clientX >=
-                rect.left - extraX &&
+                rect.left -
+                extraX &&
+
             clientX <=
-                rect.right + extraX &&
+                rect.right +
+                extraX &&
+
             clientY >=
                 rect.top &&
+
             clientY <=
                 rect.bottom
         ) {
@@ -1706,25 +2488,23 @@ function getTargetRod(clientX, clientY) {
 }
 
 
-/*
-===========================================================
-更新目标柱高亮
-===========================================================
-*/
+/* =========================================================
+   更新目标
+========================================================= */
 
 function updateDropTarget(
     clientX,
     clientY
 ) {
 
+    clearDropTargets();
+
+
     const target =
         getTargetRod(
             clientX,
             clientY
         );
-
-
-    clearDropTargets();
 
 
     if (
@@ -1745,38 +2525,56 @@ function updateDropTarget(
         );
 
 
-    const targetTop =
+    const top =
         towers[target][
             towers[target].length - 1
         ];
 
 
     /*
-     * 判断是否合法
+     * 合法
      */
 
     if (
-        targetTop === undefined ||
-        size < targetTop
+        top === undefined ||
+        size < top
     ) {
 
         currentTarget =
             target;
 
-        document
-            .querySelector(
+
+        const area =
+            document.querySelector(
                 `.rod-area[data-rod="${target}"]`
-            )
-            .classList.add(
-                "drop-target"
             );
 
-    } else {
+
+        area.classList.add(
+            "drop-target"
+        );
+
+
+        showMessage(
+            "✓ 可以放到 " +
+            ["A","B","C"][target] +
+            " 柱",
+            "good"
+        );
+
+    }
+
+    /*
+     * 不合法
+     */
+
+    else {
 
         currentTarget = -1;
 
+
         showMessage(
-            "❌ 这个圆盘太大，不能放在上面",
+            "❌ 大圆盘不能放在小圆盘上",
             "bad"
         );
 
@@ -1785,11 +2583,9 @@ function updateDropTarget(
 }
 
 
-/*
-===========================================================
-清除目标效果
-===========================================================
-*/
+/* =========================================================
+   清除目标
+========================================================= */
 
 function clearDropTargets() {
 
@@ -1807,21 +2603,18 @@ function clearDropTargets() {
 }
 
 
-/*
-===========================================================
-松手
-===========================================================
-*/
+/* =========================================================
+   松手
+========================================================= */
 
 function endDrag(e) {
 
     if (
         !dragging ||
-        e.pointerId !== dragPointerId
+        e.pointerId !==
+            dragPointerId
     ) {
-
         return;
-
     }
 
 
@@ -1832,10 +2625,6 @@ function endDrag(e) {
     clearDropTargets();
 
 
-    /*
-     * 合法移动
-     */
-
     if (
         target !== -1 &&
         target !== dragFrom
@@ -1845,12 +2634,9 @@ function endDrag(e) {
             target
         );
 
-    } else {
+    }
 
-        /*
-         * 非法：
-         * 回到原来的柱子
-         */
+    else {
 
         cancelDrag();
 
@@ -1861,16 +2647,28 @@ function endDrag(e) {
 
     dragPointerId = null;
 
+
+    try {
+
+        board.releasePointerCapture(
+            e.pointerId
+        );
+
+    } catch (err) {}
+
+
+    e.preventDefault();
+
 }
 
 
-/*
-===========================================================
-完成拖拽
-===========================================================
-*/
+/* =========================================================
+   完成移动
+========================================================= */
 
-function completeDrag(target) {
+function completeDrag(
+    target
+) {
 
     const size =
         parseInt(
@@ -1890,22 +2688,22 @@ function completeDrag(target) {
 
 
     /*
-     * 圆盘加入目标柱
+     * 放入目标柱
      */
 
     towers[target].push(
         size
     );
 
+
     moves++;
 
 
-    document.getElementById("moves")
-        .textContent = moves;
+    updateStats();
 
 
     /*
-     * 删除拖拽对象
+     * 删除浮动盘
      */
 
     dragDisk.remove();
@@ -1916,22 +2714,17 @@ function completeDrag(target) {
     render();
 
 
-    /*
-     * 播放轻微落下提示
-     */
-
     showMessage(
         "✓ 圆盘 " +
         size +
-        " 已放到 " +
-        ["A","B","C"][target] +
-        " 柱",
+        " → " +
+        ["A","B","C"][target],
         "good"
     );
 
 
     /*
-     * 检查胜利
+     * 胜利
      */
 
     if (
@@ -1946,11 +2739,9 @@ function completeDrag(target) {
 }
 
 
-/*
-===========================================================
-取消拖拽
-===========================================================
-*/
+/* =========================================================
+   取消
+========================================================= */
 
 function cancelDrag() {
 
@@ -1959,10 +2750,6 @@ function cancelDrag() {
             dragDisk.dataset.size
         );
 
-
-    /*
-     * 把圆盘放回原柱
-     */
 
     towers[dragFrom].push(
         size
@@ -1978,98 +2765,61 @@ function cancelDrag() {
 
 
     showMessage(
-        "↩️ 已放回原来的位置",
+        "↩️ 圆盘已放回原位置",
         "bad"
     );
 
 }
 
 
-/*
-===========================================================
-鼠标/手指移动
-===========================================================
-*/
+/* =========================================================
+   Pointer Move
+========================================================= */
 
 board.addEventListener(
     "pointermove",
-    moveDrag
-);
-
-
-/*
-===========================================================
-鼠标/手指松开
-===========================================================
-*/
-
-board.addEventListener(
-    "pointerup",
-    endDrag
-);
-
-board.addEventListener(
-    "pointercancel",
-    endDrag
-);
-
-
-/*
-===========================================================
-防止拖动时浏览器滚动
-===========================================================
-*/
-
-board.addEventListener(
-    "pointerdown",
-    e => {
-
-        if (
-            e.target.classList.contains(
-                "disk"
-            )
-        ) {
-
-            e.preventDefault();
-
-        }
-
-    },
+    moveDrag,
     {
         passive: false
     }
 );
 
 
-/*
-===========================================================
-提示
-===========================================================
-*/
+/* =========================================================
+   Pointer Up
+========================================================= */
 
-function showMessage(
-    text,
-    type = ""
-) {
-
-    message.textContent = text;
-
-    message.className =
-        "message " + type;
-
-}
+board.addEventListener(
+    "pointerup",
+    endDrag,
+    {
+        passive: false
+    }
+);
 
 
-/*
-===========================================================
-计时器
-===========================================================
-*/
+/* =========================================================
+   Pointer Cancel
+========================================================= */
+
+board.addEventListener(
+    "pointercancel",
+    endDrag,
+    {
+        passive: false
+    }
+);
+
+
+/* =========================================================
+   计时
+========================================================= */
 
 function startTimer() {
 
     startTime =
         Date.now();
+
 
     clearInterval(timer);
 
@@ -2103,34 +2853,69 @@ function startTimer() {
 }
 
 
-function updateTime(seconds) {
+/* =========================================================
+   时间
+========================================================= */
+
+function updateTime(
+    seconds
+) {
 
     const minutes =
         Math.floor(
             seconds / 60
         );
 
+
     const sec =
         seconds % 60;
 
 
-    document.getElementById(
-        "time"
-    ).textContent =
+    const text =
         String(minutes)
             .padStart(2,"0") +
         ":" +
         String(sec)
             .padStart(2,"0");
 
+
+    document.getElementById(
+        "time"
+    ).textContent =
+        text;
+
+
+    document.getElementById(
+        "mobileTime"
+    ).textContent =
+        text;
+
 }
 
 
-/*
-===========================================================
-撤销
-===========================================================
-*/
+/* =========================================================
+   更新数据
+========================================================= */
+
+function updateStats() {
+
+    document.getElementById(
+        "moves"
+    ).textContent =
+        moves;
+
+
+    document.getElementById(
+        "mobileMoves"
+    ).textContent =
+        moves;
+
+}
+
+
+/* =========================================================
+   撤销
+========================================================= */
 
 function undoMove() {
 
@@ -2160,15 +2945,18 @@ function undoMove() {
 
     moves--;
 
+
     if (moves < 0) {
         moves = 0;
     }
 
 
-    document.getElementById(
-        "moves"
-    ).textContent = moves;
+    updateStats();
 
+
+    /*
+     * 如果完全撤销
+     */
 
     if (moves === 0) {
 
@@ -2176,8 +2964,15 @@ function undoMove() {
 
         startTime = null;
 
+
         document.getElementById(
             "time"
+        ).textContent =
+            "00:00";
+
+
+        document.getElementById(
+            "mobileTime"
         ).textContent =
             "00:00";
 
@@ -2194,15 +2989,14 @@ function undoMove() {
 }
 
 
-/*
-===========================================================
-完成游戏
-===========================================================
-*/
+/* =========================================================
+   完成游戏
+========================================================= */
 
 function finishGame() {
 
     gameFinished = true;
+
 
     clearInterval(timer);
 
@@ -2237,22 +3031,38 @@ function finishGame() {
     setTimeout(
         () => {
 
-            winOverlay
-                .classList
-                .add("show");
+            winOverlay.classList.add(
+                "show"
+            );
 
         },
-        250
+        220
     );
 
 }
 
 
-/*
-===========================================================
-重新开始
-===========================================================
-*/
+/* =========================================================
+   提示
+========================================================= */
+
+function showMessage(
+    text,
+    type = ""
+) {
+
+    message.textContent =
+        text;
+
+    message.className =
+        "message " + type;
+
+}
+
+
+/* =========================================================
+   重新开始
+========================================================= */
 
 function restartGame() {
 
@@ -2261,11 +3071,55 @@ function restartGame() {
 }
 
 
-/*
-===========================================================
-按钮
-===========================================================
-*/
+/* =========================================================
+   PC 圆盘数量
+========================================================= */
+
+document
+    .getElementById(
+        "diskCount"
+    )
+    .addEventListener(
+        "change",
+        function() {
+
+            document.getElementById(
+                "mobileDiskCount"
+            ).value =
+                this.value;
+
+            restartGame();
+
+        }
+    );
+
+
+/* =========================================================
+   手机圆盘数量
+========================================================= */
+
+document
+    .getElementById(
+        "mobileDiskCount"
+    )
+    .addEventListener(
+        "change",
+        function() {
+
+            document.getElementById(
+                "diskCount"
+            ).value =
+                this.value;
+
+            restartGame();
+
+        }
+    );
+
+
+/* =========================================================
+   PC 按钮
+========================================================= */
 
 document
     .getElementById(
@@ -2287,6 +3141,34 @@ document
     );
 
 
+/* =========================================================
+   手机按钮
+========================================================= */
+
+document
+    .getElementById(
+        "mobileRestartBtn"
+    )
+    .addEventListener(
+        "click",
+        restartGame
+    );
+
+
+document
+    .getElementById(
+        "mobileUndoBtn"
+    )
+    .addEventListener(
+        "click",
+        undoMove
+    );
+
+
+/* =========================================================
+   胜利按钮
+========================================================= */
+
 document
     .getElementById(
         "winRestartBtn"
@@ -2297,25 +3179,29 @@ document
     );
 
 
-document
-    .getElementById(
-        "diskCount"
-    )
-    .addEventListener(
-        "change",
-        restartGame
-    );
+/* =========================================================
+   防止浏览器手势干扰
+========================================================= */
+
+document.addEventListener(
+    "gesturestart",
+    function(e) {
+        e.preventDefault();
+    },
+    {
+        passive: false
+    }
+);
 
 
-/*
-===========================================================
-启动
-===========================================================
-*/
+/* =========================================================
+   启动
+========================================================= */
 
 initGame();
 
 </script>
 
 </body>
+
 </html>
