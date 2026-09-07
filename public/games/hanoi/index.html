@@ -1,0 +1,1165 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>汉诺塔 · 圆盘挑战</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family:
+        "Microsoft YaHei",
+        "PingFang SC",
+        Arial,
+        sans-serif;
+
+    background:
+        radial-gradient(circle at 20% 20%, #263b72 0%, transparent 35%),
+        radial-gradient(circle at 80% 80%, #321f65 0%, transparent 35%),
+        linear-gradient(135deg, #080b18, #10162d 50%, #090b18);
+
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 主容器 */
+.game {
+    width: min(1100px, 100%);
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px;
+    padding: 24px;
+
+    backdrop-filter: blur(18px);
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.45),
+        inset 0 1px rgba(255,255,255,.08);
+}
+
+/* 标题 */
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header h1 {
+    font-size: clamp(30px, 5vw, 48px);
+    letter-spacing: 4px;
+
+    background: linear-gradient(
+        90deg,
+        #66e8ff,
+        #9c7cff,
+        #ff70c7
+    );
+
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.header p {
+    margin-top: 8px;
+    color: #9da8c7;
+    font-size: 14px;
+}
+
+/* 控制区 */
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.control-item {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: 9px 14px;
+    border-radius: 12px;
+    color: #c9d2ee;
+}
+
+select,
+button {
+    font-family: inherit;
+}
+
+select {
+    background: #161d38;
+    color: white;
+    border: 1px solid #394566;
+    border-radius: 8px;
+    padding: 6px 10px;
+    outline: none;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+
+    background: linear-gradient(
+        135deg,
+        #5068ff,
+        #8058ff
+    );
+
+    box-shadow: 0 5px 18px rgba(90,90,255,.25);
+    transition: .2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+}
+
+button:active {
+    transform: scale(.96);
+}
+
+/* 数据 */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.stat {
+    text-align: center;
+    padding: 13px;
+
+    background: rgba(0,0,0,.2);
+    border-radius: 14px;
+
+    border: 1px solid rgba(255,255,255,.07);
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #8994b5;
+}
+
+.stat-value {
+    margin-top: 5px;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+/* 游戏区域 */
+.board {
+    position: relative;
+
+    min-height: 430px;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.04),
+            rgba(255,255,255,.01)
+        );
+
+    border: 1px solid rgba(255,255,255,.08);
+
+    overflow: hidden;
+
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+
+    padding: 35px 3% 65px;
+}
+
+/* 地面 */
+.board::after {
+    content: "";
+
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    bottom: 48px;
+
+    height: 7px;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        90deg,
+        #41537e,
+        #778ac0,
+        #41537e
+    );
+
+    box-shadow:
+        0 0 20px rgba(100,130,255,.4);
+}
+
+/* 柱子 */
+.rod-area {
+    position: relative;
+
+    width: 30%;
+
+    height: 350px;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    flex-direction: column;
+
+    z-index: 2;
+
+    cursor: pointer;
+}
+
+.rod {
+    position: absolute;
+
+    bottom: 48px;
+
+    width: 10px;
+    height: 280px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7183ba,
+            #d3ddff,
+            #7183ba
+        );
+
+    box-shadow:
+        0 0 15px rgba(140,170,255,.25);
+}
+
+.rod-label {
+    position: absolute;
+    bottom: 5px;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    color: #aeb9d9;
+}
+
+.rod-hint {
+    position: absolute;
+    top: 8px;
+
+    font-size: 12px;
+    color: #667294;
+
+    transition: .2s;
+}
+
+.rod-area.selected .rod-hint {
+    color: #72dcff;
+}
+
+/* 圆盘 */
+.disks {
+    position: absolute;
+
+    bottom: 48px;
+
+    width: 100%;
+    height: 280px;
+
+    display: flex;
+    flex-direction: column-reverse;
+
+    align-items: center;
+
+    pointer-events: none;
+}
+
+.disk {
+    position: relative;
+
+    height: 32px;
+
+    margin-top: 2px;
+
+    border-radius: 8px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: rgba(255,255,255,.9);
+
+    font-size: 12px;
+    font-weight: bold;
+
+    box-shadow:
+        0 4px 8px rgba(0,0,0,.35),
+        inset 0 1px rgba(255,255,255,.25);
+
+    transition:
+        transform .25s,
+        width .25s,
+        opacity .2s;
+}
+
+/* 不同圆盘颜色 */
+.disk:nth-child(1) {
+    background: linear-gradient(90deg,#ff4d7d,#ff7a96);
+}
+
+.disk:nth-child(2) {
+    background: linear-gradient(90deg,#ff8a3d,#ffb15c);
+}
+
+.disk:nth-child(3) {
+    background: linear-gradient(90deg,#ffd23f,#ffe77d);
+    color: #4b3b00;
+}
+
+.disk:nth-child(4) {
+    background: linear-gradient(90deg,#42df9b,#7af0ba);
+}
+
+.disk:nth-child(5) {
+    background: linear-gradient(90deg,#35b9ff,#79d8ff);
+}
+
+.disk:nth-child(6) {
+    background: linear-gradient(90deg,#687cff,#9a8cff);
+}
+
+.disk:nth-child(7) {
+    background: linear-gradient(90deg,#a95dff,#cf94ff);
+}
+
+.disk:nth-child(8) {
+    background: linear-gradient(90deg,#ec54ff,#ff8bd9);
+}
+
+/* 选中状态 */
+.rod-area.selected {
+    filter: brightness(1.2);
+}
+
+.rod-area.selected .rod {
+    box-shadow:
+        0 0 25px rgba(80,210,255,.8);
+}
+
+/* 提示 */
+.message {
+    min-height: 25px;
+
+    text-align: center;
+
+    margin-top: 16px;
+
+    color: #91a2ce;
+
+    font-size: 14px;
+}
+
+/* 胜利弹窗 */
+.win-overlay {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(3,5,15,.75);
+
+    backdrop-filter: blur(8px);
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+
+    z-index: 100;
+}
+
+.win-overlay.show {
+    display: flex;
+}
+
+.win {
+    width: min(420px,100%);
+
+    padding: 35px;
+
+    text-align: center;
+
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #172143,
+            #10162e
+        );
+
+    border: 1px solid rgba(255,255,255,.12);
+
+    box-shadow: 0 30px 100px rgba(0,0,0,.6);
+
+    animation: pop .35s ease;
+}
+
+@keyframes pop {
+    from {
+        transform: scale(.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.win-icon {
+    font-size: 65px;
+}
+
+.win h2 {
+    font-size: 30px;
+    margin: 10px 0;
+}
+
+.win p {
+    color: #aab5d3;
+    line-height: 1.8;
+}
+
+.win-score {
+    margin: 20px 0;
+
+    padding: 15px;
+
+    background: rgba(255,255,255,.05);
+
+    border-radius: 14px;
+
+    font-size: 18px;
+}
+
+/* 底部 */
+.footer {
+    text-align: center;
+    color: #596582;
+    font-size: 12px;
+    margin-top: 18px;
+}
+
+/* 手机 */
+@media (max-width: 650px) {
+
+    body {
+        padding: 8px;
+    }
+
+    .game {
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .board {
+        min-height: 390px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .rod-area {
+        width: 33%;
+    }
+
+    .rod {
+        height: 260px;
+    }
+
+    .disks {
+        height: 260px;
+    }
+
+    .disk {
+        height: 29px;
+    }
+
+    .header h1 {
+        font-size: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="header">
+        <h1>汉诺塔</h1>
+        <p>HANOI TOWER · 圆盘挑战</p>
+    </div>
+
+    <div class="controls">
+
+        <div class="control-item">
+            圆盘：
+            <select id="diskCount">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected>5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+        </div>
+
+        <button onclick="restartGame()">🔄 重新开始</button>
+
+        <button onclick="undoMove()">↩️ 撤销</button>
+
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-label">当前步数</div>
+            <div class="stat-value" id="moves">0</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">最少步数</div>
+            <div class="stat-value" id="minimum">31</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">用时</div>
+            <div class="stat-value" id="time">00:00</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">圆盘数量</div>
+            <div class="stat-value" id="count">5</div>
+        </div>
+
+    </div>
+
+    <div class="board">
+
+        <div class="rod-area" id="rod0" onclick="clickRod(0)">
+            <div class="rod"></div>
+            <div class="disks" id="disks0"></div>
+            <div class="rod-hint">点击选择</div>
+            <div class="rod-label">A</div>
+        </div>
+
+        <div class="rod-area" id="rod1" onclick="clickRod(1)">
+            <div class="rod"></div>
+            <div class="disks" id="disks1"></div>
+            <div class="rod-hint">点击选择</div>
+            <div class="rod-label">B</div>
+        </div>
+
+        <div class="rod-area" id="rod2" onclick="clickRod(2)">
+            <div class="rod"></div>
+            <div class="disks" id="disks2"></div>
+            <div class="rod-hint">点击选择</div>
+            <div class="rod-label">C</div>
+        </div>
+
+    </div>
+
+    <div class="message" id="message">
+        点击一个圆盘所在的柱子，然后点击目标柱子
+    </div>
+
+    <div class="footer">
+        规则：大圆盘不能放在小圆盘上面
+    </div>
+
+</div>
+
+
+<!-- 胜利弹窗 -->
+
+<div class="win-overlay" id="winOverlay">
+
+    <div class="win">
+
+        <div class="win-icon">🏆</div>
+
+        <h2>挑战成功！</h2>
+
+        <p>
+            你成功完成了汉诺塔挑战
+        </p>
+
+        <div class="win-score">
+
+            <div>
+                步数：
+                <strong id="winMoves">0</strong>
+            </div>
+
+            <div>
+                最少：
+                <strong id="winMinimum">0</strong>
+            </div>
+
+            <div>
+                用时：
+                <strong id="winTime">00:00</strong>
+            </div>
+
+        </div>
+
+        <button onclick="restartGame()">
+            🔄 再来一次
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/*
+=========================================================
+汉诺塔核心数据
+=========================================================
+*/
+
+let diskCount = 5;
+
+let towers = [
+    [],
+    [],
+    []
+];
+
+let moves = 0;
+
+let selectedRod = null;
+
+let history = [];
+
+let startTime = null;
+
+let timer = null;
+
+let gameFinished = false;
+
+
+/*
+=========================================================
+初始化
+=========================================================
+*/
+
+function initGame() {
+
+    diskCount =
+        parseInt(
+            document.getElementById("diskCount").value
+        );
+
+    towers = [
+        [],
+        [],
+        []
+    ];
+
+    /*
+     * 最大圆盘放最下面
+     * 最小圆盘放最上面
+     */
+    for (let i = diskCount; i >= 1; i--) {
+
+        towers[0].push(i);
+
+    }
+
+    moves = 0;
+
+    selectedRod = null;
+
+    history = [];
+
+    startTime = null;
+
+    gameFinished = false;
+
+    clearInterval(timer);
+
+    document.getElementById("moves").textContent = "0";
+
+    document.getElementById("count").textContent = diskCount;
+
+    document.getElementById("minimum").textContent =
+        Math.pow(2, diskCount) - 1;
+
+    document.getElementById("time").textContent =
+        "00:00";
+
+    document.getElementById("winOverlay")
+        .classList.remove("show");
+
+    document.getElementById("message").textContent =
+        "点击一个圆盘所在的柱子，然后点击目标柱子";
+
+    render();
+
+}
+
+
+/*
+=========================================================
+绘制
+=========================================================
+*/
+
+function render() {
+
+    for (let i = 0; i < 3; i++) {
+
+        const container =
+            document.getElementById("disks" + i);
+
+        container.innerHTML = "";
+
+        /*
+         * towers 中：
+         * 数组末尾 = 最上面的圆盘
+         */
+        towers[i].forEach(disk => {
+
+            const el =
+                document.createElement("div");
+
+            el.className = "disk";
+
+            /*
+             * 根据圆盘大小计算宽度
+             */
+            const minWidth = 50;
+
+            const maxWidth = 190;
+
+            const width =
+                minWidth +
+                (disk - 1) /
+                Math.max(1, diskCount - 1) *
+                (maxWidth - minWidth);
+
+            el.style.width = width + "px";
+
+            el.textContent = disk;
+
+            container.appendChild(el);
+
+        });
+
+    }
+
+}
+
+
+/*
+=========================================================
+点击柱子
+=========================================================
+*/
+
+function clickRod(index) {
+
+    if (gameFinished) {
+        return;
+    }
+
+    /*
+     * 第一次点击
+     * 选择来源柱
+     */
+    if (selectedRod === null) {
+
+        if (towers[index].length === 0) {
+
+            showMessage("这个柱子没有圆盘");
+
+            return;
+
+        }
+
+        selectedRod = index;
+
+        document
+            .getElementById("rod" + index)
+            .classList.add("selected");
+
+        showMessage(
+            "已选择 " +
+            ["A","B","C"][index] +
+            " 柱，请选择目标柱"
+        );
+
+        return;
+    }
+
+
+    /*
+     * 第二次点击
+     * 选择目标柱
+     */
+
+    if (selectedRod === index) {
+
+        clearSelection();
+
+        showMessage(
+            "取消选择，请重新选择圆盘"
+        );
+
+        return;
+    }
+
+
+    moveDisk(selectedRod, index);
+
+}
+
+
+/*
+=========================================================
+移动圆盘
+=========================================================
+*/
+
+function moveDisk(from, to) {
+
+    const source = towers[from];
+
+    const target = towers[to];
+
+    if (source.length === 0) {
+
+        clearSelection();
+
+        return;
+
+    }
+
+    const disk =
+        source[source.length - 1];
+
+    const targetTop =
+        target[target.length - 1];
+
+    /*
+     * 汉诺塔核心规则
+     *
+     * 大圆盘不能压在小圆盘上
+     */
+    if (
+        targetTop !== undefined &&
+        disk > targetTop
+    ) {
+
+        showMessage(
+            "❌ 不能把大圆盘放到小圆盘上面"
+        );
+
+        return;
+    }
+
+
+    /*
+     * 第一次有效移动
+     * 开始计时
+     */
+
+    if (moves === 0) {
+
+        startTimer();
+
+    }
+
+
+    /*
+     * 保存历史
+     * 用于撤销
+     */
+
+    history.push(
+        JSON.stringify(towers)
+    );
+
+
+    source.pop();
+
+    target.push(disk);
+
+    moves++;
+
+    document.getElementById("moves")
+        .textContent = moves;
+
+    clearSelection();
+
+    render();
+
+    showMessage(
+        "移动成功： " +
+        ["A","B","C"][from] +
+        " → " +
+        ["A","B","C"][to]
+    );
+
+
+    /*
+     * 检查胜利
+     */
+
+    if (
+        towers[2].length === diskCount
+    ) {
+
+        finishGame();
+
+    }
+
+}
+
+
+/*
+=========================================================
+撤销
+=========================================================
+*/
+
+function undoMove() {
+
+    if (history.length === 0) {
+
+        showMessage("目前没有可以撤销的操作");
+
+        return;
+
+    }
+
+    towers =
+        JSON.parse(
+            history.pop()
+        );
+
+    moves--;
+
+    if (moves < 0) {
+        moves = 0;
+    }
+
+    document.getElementById("moves")
+        .textContent = moves;
+
+    if (moves === 0) {
+
+        clearInterval(timer);
+
+        startTime = null;
+
+        document.getElementById("time")
+            .textContent = "00:00";
+
+    }
+
+    clearSelection();
+
+    render();
+
+    showMessage("↩️ 已撤销一步");
+
+}
+
+
+/*
+=========================================================
+选择状态
+=========================================================
+*/
+
+function clearSelection() {
+
+    selectedRod = null;
+
+    for (let i = 0; i < 3; i++) {
+
+        document
+            .getElementById("rod" + i)
+            .classList.remove("selected");
+
+    }
+
+}
+
+
+/*
+=========================================================
+提示
+=========================================================
+*/
+
+function showMessage(text) {
+
+    document.getElementById("message")
+        .textContent = text;
+
+}
+
+
+/*
+=========================================================
+计时器
+=========================================================
+*/
+
+function startTimer() {
+
+    startTime = Date.now();
+
+    clearInterval(timer);
+
+    timer = setInterval(() => {
+
+        if (!startTime) {
+            return;
+        }
+
+        const seconds =
+            Math.floor(
+                (Date.now() - startTime) / 1000
+            );
+
+        updateTime(seconds);
+
+    }, 1000);
+
+}
+
+
+function updateTime(seconds) {
+
+    const minutes =
+        Math.floor(seconds / 60);
+
+    const sec =
+        seconds % 60;
+
+    document.getElementById("time")
+        .textContent =
+        String(minutes).padStart(2,"0") +
+        ":" +
+        String(sec).padStart(2,"0");
+
+}
+
+
+/*
+=========================================================
+完成
+=========================================================
+*/
+
+function finishGame() {
+
+    gameFinished = true;
+
+    clearInterval(timer);
+
+    const finalTime =
+        document.getElementById("time")
+            .textContent;
+
+    document.getElementById("winMoves")
+        .textContent = moves;
+
+    document.getElementById("winMinimum")
+        .textContent =
+        Math.pow(2, diskCount) - 1;
+
+    document.getElementById("winTime")
+        .textContent = finalTime;
+
+    document.getElementById("winOverlay")
+        .classList.add("show");
+
+}
+
+
+/*
+=========================================================
+重新开始
+=========================================================
+*/
+
+function restartGame() {
+
+    initGame();
+
+}
+
+
+/*
+=========================================================
+圆盘数量改变
+=========================================================
+*/
+
+document
+    .getElementById("diskCount")
+    .addEventListener(
+        "change",
+        restartGame
+    );
+
+
+/*
+=========================================================
+启动游戏
+=========================================================
+*/
+
+initGame();
+
+</script>
+
+</body>
+</html>
+```
