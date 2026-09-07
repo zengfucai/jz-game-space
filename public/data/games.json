@@ -21,7 +21,6 @@
         "icon": "🐍",
         "path": "/games/snake/index.html"
     },
-
     {
         "id": "minesweeper",
         "name": "扫雷",
@@ -33,39 +32,39 @@
         "icon": "💣",
         "path": "/games/minesweeper/index.html"
     },
-{
-    "id": "gomoku",
-    "name": "五子棋",
-    "description": "经典双人五子棋，黑白双方轮流落子，先连成五子者获胜。",
-    "category": "益智",
-    "version": "1.0.0",
-    "date": "2026-09-01",
-    "isNew": true,
-    "icon": "❌⭕",
-    "path": "/games/gomoku/index.html"
-},
-{
-    "id": "tower-defense",
-    "name": "JZ 塔防",
-    "description": "建造炮塔抵御一波又一波的敌人，守住你的城堡。",
-    "category": "策略",
-    "version": "1.0.0",
-    "date": "2026-09-01",
-    "isNew": true,
-    "icon": "🏰",
-    "path": "/games/tower-defense/index.html"
-},
-{
-    "id": "street-legend",
-    "name": "JZ 街头传说",
-    "description": "复古横版清关动作游戏，击败敌人并突破城市街头。",
-    "category": "动作",
-    "version": "1.0.0",
-    "date": "2026-09-01",
-    "isNew": true,
-    "icon": "🥋",
-    "path": "/games/street-legend/index.html"
-},
+    {
+        "id": "gomoku",
+        "name": "五子棋",
+        "description": "经典双人五子棋，黑白双方轮流落子，先连成五子者获胜。",
+        "category": "益智",
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "isNew": true,
+        "icon": "❌⭕",
+        "path": "/games/gomoku/index.html"
+    },
+    {
+        "id": "tower-defense",
+        "name": "JZ 塔防",
+        "description": "建造炮塔抵御一波又一波的敌人，守住你的城堡。",
+        "category": "策略",
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "isNew": true,
+        "icon": "🏰",
+        "path": "/games/tower-defense/index.html"
+    },
+    {
+        "id": "street-legend",
+        "name": "JZ 街头传说",
+        "description": "复古横版清关动作游戏，击败敌人并突破城市街头。",
+        "category": "动作",
+        "version": "1.0.0",
+        "date": "2026-09-01",
+        "isNew": true,
+        "icon": "🥋",
+        "path": "/games/street-legend/index.html"
+    },
     {
         "id": "deep-eat",
         "name": "JZ 深海吞噬",
@@ -77,14 +76,15 @@
         "icon": "🌊",
         "path": "/games/deep-eat/index.html"
     },
-{
-  "id": "hanoi",
-  "title": "汉诺塔",
-  "description": "经典汉诺塔圆盘挑战，挑战最少步数完成通关",
-  "path": "/games/hanoi/index.html",
-  "category": "益智",
-  "date": "2026-09-07",
-  "icon": "🗼"
-}
-
+    {
+        "id": "hanoi",
+        "name": "汉诺塔",
+        "description": "经典汉诺塔圆盘挑战，挑战最少步数完成通关。",
+        "category": "益智",
+        "version": "1.0.0",
+        "date": "2026-09-07",
+        "isNew": true,
+        "icon": "🗼",
+        "path": "/games/hanoi/index.html"
+    }
 ]
